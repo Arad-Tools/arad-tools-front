@@ -1,0 +1,194 @@
+/* ─── Imports (MUST be first) ─────────────────────────────────────────────── */
+@import "tailwindcss";
+@config "../tailwind.config.ts";
+
+/* Explicit content paths — ensures custom utilities are generated in Next.js dev */
+@source "../app";
+@source "../components";
+@source "../lib";
+
+/* ─── Theme (Tailwind v4) ─────────────────────────────────────────────────── */
+@theme {
+  /* Brand orange */
+  --color-brand-50:  #fff4ed;
+  --color-brand-100: #ffe6d5;
+  --color-brand-200: #ffc9a8;
+  --color-brand-300: #ffa270;
+  --color-brand-400: #fe7137;
+  --color-brand-500: #fc4d0f;
+  --color-brand-600: #ed3405;
+  --color-brand-700: #c52306;
+  --color-brand-800: #9c1e0d;
+  --color-brand-900: #7e1c0e;
+  --color-brand-950: #440a04;
+  --color-brand: #D4490E;
+
+  /* Navy — reset CSS named-color "navy" so custom palette utilities are generated */
+  --color-navy-*: initial;
+  --color-navy-50:  #eef3f8;
+  --color-navy-100: #d4e1ec;
+  --color-navy-200: #a9c3d9;
+  --color-navy-300: #7399bb;
+  --color-navy-400: #4a75a0;
+  --color-navy-500: #305b87;
+  --color-navy-600: #254870;
+  --color-navy-700: #1f3b5c;
+  --color-navy-800: #1a2e44;
+  --color-navy-900: #111f2e;
+  --color-navy-950: #080f17;
+  --color-navy: #1a2e44;
+
+  /* Custom shadows */
+  --shadow-card: 0 1px 3px 0 rgba(0,0,0,0.07), 0 1px 2px -1px rgba(0,0,0,0.05);
+  --shadow-card-hover: 0 8px 24px -4px rgba(0,0,0,0.12), 0 4px 8px -2px rgba(0,0,0,0.07);
+  --shadow-product: 0 2px 8px rgba(0,0,0,0.06);
+  --shadow-product-hover: 0 12px 32px rgba(0,0,0,0.12);
+
+  /* Custom animations */
+  --animate-slide-in-rtl: slideInRtl 0.3s ease-out;
+  --animate-shimmer: shimmer 1.5s infinite;
+}
+
+/* ─── Base ────────────────────────────────────────────────────────────────── */
+@layer base {
+  :root {
+    --font-vazir: 'Vazirmatn';
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    font-family: var(--font-vazir), Tahoma, Arial, sans-serif;
+    background-color: rgb(249 250 251);
+    color: rgb(17 24 39);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  input,
+  textarea,
+  select {
+    direction: rtl;
+    text-align: right;
+  }
+}
+
+/* ─── Utilities ───────────────────────────────────────────────────────────── */
+@layer utilities {
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  .product-card:hover .product-img {
+    transform: scale(1.06);
+  }
+
+  .shimmer {
+    background: linear-gradient(
+      90deg,
+      #e5e7eb 25%,
+      #f3f4f6 50%,
+      #e5e7eb 75%
+    );
+    background-size: 400px 100%;
+    animation: shimmer 1.6s infinite;
+  }
+
+  .rtl-scroll-area {
+    overflow-x: auto;
+    flex-direction: row;
+  }
+
+  .focus-ring {
+    outline: none;
+  }
+
+  .focus-ring:focus-visible {
+    box-shadow:
+      0 0 0 2px rgba(212, 73, 14, 0.6),
+      0 0 0 4px white;
+  }
+}
+
+/* ─── Components ──────────────────────────────────────────────────────────── */
+@layer components {
+  .section-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: rgb(17 24 39);
+    line-height: 1.625;
+  }
+
+  .btn-primary {
+    background-color: #D4490E;
+    color: white;
+    font-weight: 600;
+    border-radius: 0.75rem;
+    padding: 0.625rem 1.5rem;
+    transition: all 150ms;
+  }
+
+  .btn-primary:hover {
+    background-color: #c52306;
+  }
+
+  .btn-primary:active {
+    transform: scale(0.95);
+  }
+
+  .btn-primary:focus-visible {
+    box-shadow:
+      0 0 0 2px rgba(212, 73, 14, 0.5),
+      0 0 0 4px white;
+  }
+
+  .btn-outline {
+    border: 1px solid #D4490E;
+    color: #D4490E;
+    font-weight: 600;
+    border-radius: 0.75rem;
+    padding: 0.625rem 1.5rem;
+    transition: all 150ms;
+  }
+
+  .btn-outline:hover {
+    background-color: rgba(212, 73, 14, 0.05);
+  }
+
+  .btn-outline:active {
+    transform: scale(0.95);
+  }
+}
+
+/* ─── Animations ──────────────────────────────────────────────────────────── */
+@keyframes shimmer {
+  0% {
+    background-position: -400px 0;
+  }
+  100% {
+    background-position: 400px 0;
+  }
+}
+
+@keyframes slideInRtl {
+  0% {
+    transform: translateX(100%);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
