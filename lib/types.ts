@@ -49,6 +49,81 @@ export interface Category {
   icon: string;
   slug: string;
   color: string; // Tailwind bg+text class pair
+  parentId?: string | null;
+  children?: Category[];
+}
+
+// ─── Product Listing & Filters ────────────────────────────────────────────────
+
+export interface FilterOption {
+  value: string;
+  label: string;
+  count?: number;
+  icon?: string;
+  parentSlug?: string;
+}
+
+export interface SpecFilterGroup {
+  key: string;
+  label: string;
+  options: FilterOption[];
+}
+
+export interface ProductFilterMeta {
+  total: number;
+  priceRange: { min: number; max: number };
+  categories: FilterOption[];
+  subcategories: FilterOption[];
+  brands: FilterOption[];
+  stock: FilterOption[];
+  rating: FilterOption[];
+  attributes: Record<string, SpecFilterGroup>;
+  tools: Record<string, SpecFilterGroup>;
+  sortOptions: FilterOption[];
+  activeFilters: ActiveFilter[];
+}
+
+export interface ActiveFilter {
+  key: string;
+  label: string;
+  value: string;
+  display: string;
+}
+
+export interface ProductFilters {
+  q?: string;
+  category?: string[];
+  subcategory?: string[];
+  brand?: string[];
+  min_price?: number;
+  max_price?: number;
+  stock?: string[];
+  min_rating?: number;
+  on_sale?: boolean;
+  featured?: boolean;
+  bestseller?: boolean;
+  is_new?: boolean;
+  badge?: string;
+  spec?: Record<string, string[]>;
+  sort?: string;
+  page?: number;
+  per_page?: number;
+}
+
+export interface PaginatedProducts {
+  products: Product[];
+  meta: {
+    currentPage: number;
+    lastPage: number;
+    perPage: number;
+    total: number;
+  };
+}
+
+export interface ProductListingPreset {
+  title: string;
+  subtitle?: string;
+  defaultFilters?: Partial<ProductFilters>;
 }
 
 export interface HeroBannerItem {

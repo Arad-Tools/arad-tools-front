@@ -1,6 +1,8 @@
 import type {
   Product, Video, BlogPost, Brand, Category, HeroBannerItem,
+  ProductFilters, ProductFilterMeta, PaginatedProducts,
 } from './types';
+import { buildFilterQueryString } from './product-filters';
 
 // ─── Mock Data ────────────────────────────────────────────────────────────────
 // Used as fallback when API_BASE is unset or the API returns an error.
@@ -307,4 +309,208 @@ export async function getCategories(): Promise<Category[]> {
 /** revalidate: 30 min — banners updated for campaigns */
 export async function getHeroBanners(): Promise<HeroBannerItem[]> {
   return safeFetchList('/banners', mockHeroBanners, 1800);
+}
+
+// ─── Paginated / Filtered Products ────────────────────────────────────────────
+
+interface LaravelPaginationMeta {
+  current_page: number;
+  last_page: number;
+  per_page: number;
+  total: number;
+}
+
+interface LaravelPaginatedResponse<T> {
+  data: T[];
+  meta?: LaravelPaginationMeta;
+}
+
+function unwrapPaginatedProducts(json: unknown): PaginatedProducts {
+  if (json && typeof json === 'object' && 'data' in json) {
+    const payload = json as LaravelPaginatedResponse<Product>;
+    const products = Array.isArray(payload.data) ? payload.data : [];
+    const meta = payload.meta;
+
+    return {
+      products,
+      meta: {
+        currentPage: meta?.current_page ?? 1,
+        lastPage: meta?.last_page ?? 1,
+        perPage: meta?.per_page ?? products.length,
+        total: meta?.total ?? products.length,
+      },
+    };
+  }
+
+  const products = unwrapApiList<Product>(json);
+  return {
+    products,
+    meta: { currentPage: 1, lastPage: 1, perPage: products.length, total: products.length },
+  };
+}
+
+/** Client-side mock filter for offline / fallback mode */
+function filterMockProducts(filters: ProductFilters): PaginatedProducts {
+  let items = [...mockProducts];
+
+  if (filters.q) {
+    const q = filters.q.toLowerCase();
+    items = items.filter((p) => p.title.toLowerCase().includes(q) || p.brand.toLowerCase().includes(q));
+  }
+  if (filters.badge) {
+    items = items.filter((p) => p.badge === filters.badge);
+  }
+  if (filters.on_sale) {
+    items = items.filter((p) => p.oldPrice && p.oldPrice > p.price);
+  }
+  if (filters.featured) {
+    items = items.filter((p) => p.badge === 'featured');
+  }
+  if (filters.bestseller) {
+    items = items.filter((p) => p.badge === 'bestseller');
+  }
+  if (filters.is_new) {
+    items = items.filter((p) => p.badge === 'new');
+  }
+  if (filters.min_price != null) {
+    items = items.filter((p) => p.price >= filters.min_price!);
+  }
+  if (filters.max_price != null) {
+    items = items.filter((p) => p.price <= filters.max_price!);
+  }
+  if (filters.min_rating != null) {
+    items = items.filter((p) => p.rating >= filters.min_rating!);
+  }
+  if (filters.brand?.length) {
+    items = items.filter((p) => filters.brand!.some((b) => p.brand.includes(b) || b === p.brand));
+  }
+
+  const sort = filters.sort ?? 'newest';
+  items.sort((a, b) => {
+    switch (sort) {
+      case 'price_asc':  return a.price - b.price;
+      case 'price_desc': return b.price - a.price;
+      case 'rating':     return b.rating - a.rating;
+      case 'bestseller':
+      case 'popular':    return b.reviewsCount - a.reviewsCount;
+      default:           return 0;
+    }
+  });
+
+  const page = filters.page ?? 1;
+  const perPage = filters.per_page ?? 24;
+  const total = items.length;
+  const start = (page - 1) * perPage;
+
+  return {
+    products: items.slice(start, start + perPage),
+    meta: {
+      currentPage: page,
+      lastPage: Math.max(1, Math.ceil(total / perPage)),
+      perPage,
+      total,
+    },
+  };
+}
+
+function mockFilterMeta(filters: ProductFilters): ProductFilterMeta {
+  const result = filterMockProducts({ ...filters, page: 1, per_page: 9999 });
+
+  const brandCounts = result.products.reduce<Record<string, number>>((acc, p) => {
+    acc[p.brand] = (acc[p.brand] ?? 0) + 1;
+    return acc;
+  }, {});
+
+  return {
+    total: result.meta.total,
+    priceRange: {
+      min: Math.min(...result.products.map((p) => p.price), 0),
+      max: Math.max(...result.products.map((p) => p.price), 0),
+    },
+    categories: mockCategories.map((c) => ({
+      value: c.slug,
+      label: c.name,
+      icon: c.icon,
+      count: result.products.filter((p) => p.category === c.name).length,
+    })),
+    subcategories: [],
+    brands: mockBrands.map((b) => ({
+      value: b.slug,
+      label: b.name,
+      count: brandCounts[b.name] ?? 0,
+    })),
+    stock: [
+      { value: 'in_stock', label: 'موجود', count: result.products.filter((p) => p.inStock !== false).length },
+      { value: 'out_of_stock', label: 'ناموجود', count: result.products.filter((p) => p.inStock === false).length },
+    ],
+    rating: [
+      { value: '4', label: '۴ ستاره و بالاتر', count: result.products.filter((p) => p.rating >= 4).length },
+    ],
+    attributes: {},
+    tools: {},
+    sortOptions: Object.entries({
+      newest: 'جدیدترین', price_asc: 'ارزان‌ترین', price_desc: 'گران‌ترین',
+      rating: 'بیشترین امتیاز', bestseller: 'پرفروش‌ترین',
+    }).map(([value, label]) => ({ value, label })),
+    activeFilters: [],
+  };
+}
+
+/** Fetch paginated products with filters — works client & server side */
+export async function getProductsFiltered(
+  filters: ProductFilters = {},
+  options: { revalidate?: number; cache?: RequestCache } = {},
+): Promise<PaginatedProducts> {
+  const qs = buildFilterQueryString(filters);
+  const path = qs ? `/products?${qs}` : '/products';
+
+  if (!API_BASE) {
+    return filterMockProducts(filters);
+  }
+
+  try {
+    const fetchOptions: RequestInit & { next?: { revalidate: number } } = {};
+
+    if (typeof window === 'undefined') {
+      fetchOptions.next = { revalidate: options.revalidate ?? 60 };
+    } else {
+      fetchOptions.cache = options.cache ?? 'no-store';
+    }
+
+    const res = await fetch(`${API_BASE}${path}`, fetchOptions);
+    if (!res.ok) {
+      throw new Error(`HTTP ${res.status}`);
+    }
+
+    const json: unknown = await res.json();
+    return unwrapPaginatedProducts(json);
+  } catch (err) {
+    console.warn(`[API] ${path} failed — using mock filter.`, err);
+    return filterMockProducts(filters);
+  }
+}
+
+/** Fetch dynamic filter metadata / facets */
+export async function getProductFilters(
+  filters: ProductFilters = {},
+): Promise<ProductFilterMeta> {
+  const qs = buildFilterQueryString(filters);
+  const path = qs ? `/products/filters?${qs}` : '/products/filters';
+
+  if (!API_BASE) {
+    return mockFilterMeta(filters);
+  }
+
+  try {
+    const res = await fetch(`${API_BASE}${path}`, { cache: 'no-store' });
+    if (!res.ok) {
+      throw new Error(`HTTP ${res.status}`);
+    }
+
+    const json = await res.json() as { data: ProductFilterMeta };
+    return json.data;
+  } catch (err) {
+    console.warn(`[API] ${path} failed — using mock filter meta.`, err);
+    return mockFilterMeta(filters);
+  }
 }
