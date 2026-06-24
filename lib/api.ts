@@ -1,6 +1,7 @@
 import type {
   Product, Video, BlogPost, Brand, Category, HeroBannerItem,
   ProductFilters, ProductFilterMeta, PaginatedProducts,
+  ProductDetail, ProductReview,
 } from './types';
 import { buildFilterQueryString } from './product-filters';
 
@@ -513,4 +514,186 @@ export async function getProductFilters(
     console.warn(`[API] ${path} failed — using mock filter meta.`, err);
     return mockFilterMeta(filters);
   }
+}
+
+// ─── Product Detail ───────────────────────────────────────────────────────────
+
+const mockProductDetails: Record<string, ProductDetail> = {
+  'bosch-gsb-750-re': {
+    id: '1',
+    title: 'دریل چکشی بوش GSB 750 RE',
+    slug: 'bosch-gsb-750-re',
+    sku: 'BOS-GSB750RE',
+    image: 'https://placehold.co/800x800/1a2e44/ffffff?text=%D8%AF%D8%B1%DB%8C%D9%84+%D8%A8%D9%88%D8%B4',
+    images: [
+      'https://placehold.co/800x800/1a2e44/ffffff?text=%D8%AF%D8%B1%DB%8C%D9%84+%D8%A8%D9%88%D8%B4',
+      'https://placehold.co/800x800/2a3e54/ffffff?text=%D8%B9%DA%A9%D8%B3+2',
+      'https://placehold.co/800x800/3a4e64/ffffff?text=%D8%B9%DA%A9%D8%B3+3',
+    ],
+    price: 4_850_000,
+    oldPrice: 5_600_000,
+    discountPercent: 13,
+    badge: 'sale',
+    rating: 4.7,
+    reviewsCount: 312,
+    category: 'ابزار برقی',
+    categorySlug: 'power-tools',
+    brand: 'بوش',
+    brandSlug: 'bosch',
+    inStock: true,
+    stockQuantity: 24,
+    availabilityStatus: 'in_stock',
+    availabilityLabel: 'موجود',
+    viewsCount: 1842,
+    labeledSpecifications: [
+      { key: 'brand', label: 'برند', value: 'بوش' },
+      { key: 'voltage', label: 'ولتاژ', value: '۷۵۰ وات' },
+      { key: 'weight', label: 'وزن', value: '۲.۵ کیلوگرم' },
+      { key: 'warranty', label: 'گارانتی', value: '۱۲ ماه' },
+      { key: 'tool_type', label: 'نوع ابزار', value: 'دریل چکشی' },
+    ],
+    keyFeatures: [
+      'موتور قدرتمند ۷۵۰ وات',
+      'بدنه مقاوم و ضد ضربه',
+      'طراحی ارگونومیک',
+      'مناسب استفاده صنعتی',
+    ],
+    quantityDiscounts: [
+      { minQuantity: 5, discountPercent: 5 },
+      { minQuantity: 10, discountPercent: 10 },
+    ],
+    description: '<p>دریل چکشی <strong>بوش GSB 750 RE</strong> یکی از محبوب‌ترین دریل‌های برقی صنعتی است که برای سوراخ‌کاری در بتن، فلز و چوب طراحی شده است.</p><ul><li>قدرت ۷۵۰ وات</li><li>سرعت قابل تنظیم</li><li>قابلیت چکش</li></ul>',
+    faqs: [
+      { question: 'آیا این محصول گارانتی دارد؟', answer: 'بله، این محصول ۱۲ ماه گارانتی اصالت و سلامت فیزیکی دارد.' },
+      { question: 'آیا ارسال به سراسر کشور انجام می‌شود؟', answer: 'بله، ارسال به تمام شهرهای ایران انجام می‌شود.' },
+      { question: 'زمان تحویل چقدر است؟', answer: 'تحویل در تهران ۱ تا ۲ روز و سایر شهرها ۳ تا ۵ روز کاری.' },
+    ],
+    breadcrumbs: [
+      { label: 'خانه', href: '/' },
+      { label: 'محصولات', href: '/products' },
+      { label: 'ابزار برقی', href: '/category/power-tools' },
+      { label: 'دریل چکشی بوش GSB 750 RE', href: '/product/bosch-gsb-750-re' },
+    ],
+    relatedProducts: mockProducts.filter((p) => p.slug !== 'bosch-gsb-750-re').slice(0, 8),
+    reviews: [
+      { id: '1', authorName: 'رضا محمدی', rating: 5, body: 'کیفیت عالی و قیمت مناسب', createdAt: '2026-05-10T10:00:00Z' },
+      { id: '2', authorName: 'علی رضایی', rating: 4, body: 'محصول خوبی است', createdAt: '2026-04-22T14:30:00Z' },
+    ],
+    metaTitle: 'دریل چکشی بوش GSB 750 RE | ابزار آراد',
+    metaDescription: 'خرید دریل چکشی بوش GSB 750 RE با گارانتی اصالت و ارسال سریع',
+  },
+};
+
+function buildMockProductDetail(slug: string): ProductDetail | null {
+  const base = mockProducts.find((p) => p.slug === slug);
+  if (!base) return null;
+
+  if (mockProductDetails[slug]) {
+    return mockProductDetails[slug];
+  }
+
+  return {
+    ...base,
+    sku: `SKU-${base.id}`,
+    images: [base.image],
+    discountPercent: base.oldPrice ? Math.round(((base.oldPrice - base.price) / base.oldPrice) * 100) : undefined,
+    availabilityStatus: base.inStock ? 'in_stock' : 'out_of_stock',
+    availabilityLabel: base.inStock ? 'موجود' : 'ناموجود',
+    labeledSpecifications: [
+      { key: 'brand', label: 'برند', value: base.brand },
+    ],
+    keyFeatures: ['کیفیت ساخت بالا', 'مناسب کار حرفه‌ای', 'گارانتی معتبر'],
+    quantityDiscounts: [
+      { minQuantity: 5, discountPercent: 5 },
+      { minQuantity: 10, discountPercent: 10 },
+    ],
+    faqs: [
+      { question: 'آیا این محصول گارانتی دارد؟', answer: 'بله، تمامی محصولات ما گارانتی اصالت دارند.' },
+      { question: 'آیا ارسال به سراسر کشور انجام می‌شود؟', answer: 'بله، ارسال به تمام نقاط کشور.' },
+      { question: 'زمان تحویل چقدر است؟', answer: '۱ تا ۵ روز کاری بسته به شهر مقصد.' },
+    ],
+    breadcrumbs: [
+      { label: 'خانه', href: '/' },
+      { label: 'محصولات', href: '/products' },
+      { label: base.title, href: `/product/${slug}` },
+    ],
+    relatedProducts: mockProducts.filter((p) => p.slug !== slug).slice(0, 8),
+    reviews: [],
+  };
+}
+
+/** Fetch single product detail by slug */
+export async function getProduct(slug: string): Promise<ProductDetail | null> {
+  if (!API_BASE) {
+    return buildMockProductDetail(slug);
+  }
+
+  try {
+    const res = await fetch(`${API_BASE}/products/${encodeURIComponent(slug)}`, {
+      next: { revalidate: 60 },
+    });
+
+    if (res.status === 404) return null;
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+    const json = await res.json() as ProductDetail;
+    return json;
+  } catch (err) {
+    console.warn(`[API] /products/${slug} failed — using mock.`, err);
+    return buildMockProductDetail(slug);
+  }
+}
+
+/** Submit product review */
+export async function submitProductReview(
+  slug: string,
+  data: { authorName: string; rating: number; body?: string },
+): Promise<ProductReview | null> {
+  if (!API_BASE) {
+    return {
+      id: String(Date.now()),
+      authorName: data.authorName,
+      rating: data.rating,
+      body: data.body,
+      createdAt: new Date().toISOString(),
+    };
+  }
+
+  const res = await fetch(`${API_BASE}/products/${encodeURIComponent(slug)}/reviews`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+    body: JSON.stringify(data),
+  });
+
+  if (!res.ok) return null;
+  return res.json() as Promise<ProductReview>;
+}
+
+/** Request stock notification */
+export async function notifyStockAvailable(slug: string, mobile: string): Promise<boolean> {
+  if (!API_BASE) return true;
+
+  const res = await fetch(`${API_BASE}/products/${encodeURIComponent(slug)}/notify-stock`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+    body: JSON.stringify({ mobile }),
+  });
+
+  return res.ok;
+}
+
+/** Fetch products by slugs for recently viewed */
+export async function getProductsBySlugs(slugs: string[]): Promise<Product[]> {
+  if (!slugs.length) return [];
+
+  const results: Product[] = [];
+
+  for (const slug of slugs) {
+    const detail = await getProduct(slug);
+    if (detail) {
+      results.push(detail);
+    }
+  }
+
+  return results;
 }

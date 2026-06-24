@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import { Vazirmatn } from 'next/font/google';
-import './globals.css';
+import { CartProvider } from '@/lib/stores/cart-context';
 
 // ── Persian-optimised font ────────────────────────────────────────────────────
 const vazirmatn = Vazirmatn({
@@ -43,7 +43,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     // lang="fa" + dir="rtl" — both are required for correct RTL support
     <html lang="fa" dir="rtl" className={`${vazirmatn.variable} scroll-smooth`}>
       <body className={`${vazirmatn.className} min-h-screen bg-gray-50 text-gray-900 antialiased`}>
-        {children}
+        <CartProvider>
+          {children}
+        </CartProvider>
       </body>
     </html>
   );

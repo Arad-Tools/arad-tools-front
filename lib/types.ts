@@ -13,6 +13,73 @@ export interface Product {
   category: string;
   brand: string;
   inStock?: boolean;
+  categorySlug?: string;
+  brandSlug?: string;
+  stockQuantity?: number;
+}
+
+export type AvailabilityStatus = 'in_stock' | 'out_of_stock' | 'restocking';
+
+export interface LabeledSpecification {
+  key: string;
+  label: string;
+  value: string;
+}
+
+export interface QuantityDiscount {
+  minQuantity: number;
+  discountPercent: number;
+}
+
+export interface ProductFAQ {
+  question: string;
+  answer: string;
+}
+
+export interface ProductReview {
+  id: string;
+  authorName: string;
+  rating: number;
+  body?: string;
+  createdAt?: string;
+}
+
+export interface BreadcrumbItem {
+  label: string;
+  href: string;
+}
+
+export interface ProductDetail extends Product {
+  sku?: string;
+  images: string[];
+  videoUrl?: string;
+  discountPercent?: number;
+  availabilityStatus: AvailabilityStatus;
+  availabilityLabel: string;
+  viewsCount?: number;
+  specifications?: Record<string, string | number | boolean>;
+  labeledSpecifications: LabeledSpecification[];
+  description?: string;
+  keyFeatures: string[];
+  quantityDiscounts: QuantityDiscount[];
+  faqs: ProductFAQ[];
+  metaTitle?: string;
+  metaDescription?: string;
+  breadcrumbs: BreadcrumbItem[];
+  relatedProducts: Product[];
+  videos?: Video[];
+  reviews?: ProductReview[];
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface CartItem {
+  productId: string;
+  slug: string;
+  title: string;
+  image: string;
+  price: number;
+  quantity: number;
 }
 
 export interface Video {

@@ -6,6 +6,7 @@ import {
   Search, ShoppingCart, User, Menu, X, Phone, ChevronDown,
 } from 'lucide-react';
 import { toPersianDigits } from '@/lib/utils';
+import { useCart } from '@/lib/stores/cart-context';
 
 const NAV_LINKS = [
   { label: 'ابزار برقی',     href: '/category/power-tools'  },
@@ -18,7 +19,7 @@ const NAV_LINKS = [
 
 export default function Header() {
   const [menuOpen,   setMenuOpen]   = useState(false);
-  const [cartCount ] = useState(0); // wire to real cart store in production
+  const { count: cartCount } = useCart();
 
   return (
     <header className="sticky top-0 z-50 shadow-md">
