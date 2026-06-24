@@ -12,9 +12,6 @@ const FALLBACK: Category[] = [
   { id: '3', name: 'جوشکاری',         icon: '🔥', slug: 'welding',     color: 'bg-red-50 text-red-700 border-red-200'         },
   { id: '4', name: 'اندازه‌گیری',     icon: '📐', slug: 'measuring',   color: 'bg-indigo-50 text-indigo-700 border-indigo-200' },
   { id: '5', name: 'ایمنی',           icon: '🦺', slug: 'safety',      color: 'bg-yellow-50 text-yellow-700 border-yellow-200' },
-  { id: '6', name: 'لوله و اتصالات', icon: '🔩', slug: 'plumbing',    color: 'bg-purple-50 text-purple-700 border-purple-200' },
-  { id: '7', name: 'رنگ و پوشش',     icon: '🎨', slug: 'paint',       color: 'bg-pink-50 text-pink-700 border-pink-200'       },
-  { id: '8', name: 'باغبانی',         icon: '🌿', slug: 'garden',      color: 'bg-emerald-50 text-emerald-700 border-emerald-200'},
 ];
 
 export default function CategoryStrip({ categories }: Props) {

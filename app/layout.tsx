@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import { Vazirmatn } from 'next/font/google';
 import { CartProvider } from '@/lib/stores/cart-context';
+import '@/app/globals.css';
 
 // ── Persian-optimised font ────────────────────────────────────────────────────
 const vazirmatn = Vazirmatn({
