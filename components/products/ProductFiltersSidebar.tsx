@@ -101,9 +101,10 @@ export default function ProductFiltersSidebar({ filters, meta, onChange, classNa
   ];
 
   return (
-    <aside className={cn('bg-white rounded-2xl border border-gray-100 shadow-sm p-4', className)}>
-      <h2 className="text-base font-black text-gray-900 mb-2">فیلتر محصولات</h2>
+    <aside className={cn('bg-white rounded-2xl border border-gray-100 shadow-sm flex flex-col overflow-hidden', className)}>
+      <h2 className="text-base font-black text-gray-900 px-4 pt-4 pb-2 flex-shrink-0">فیلتر محصولات</h2>
 
+      <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-4 pb-4">
       <FilterSection title="دسته‌بندی">
         <MultiCheckbox
           options={meta.categories}
@@ -217,6 +218,7 @@ export default function ProductFiltersSidebar({ filters, meta, onChange, classNa
           />
         </FilterSection>
       ))}
+      </div>
     </aside>
   );
 }

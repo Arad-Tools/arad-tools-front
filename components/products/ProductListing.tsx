@@ -133,11 +133,12 @@ export default function ProductListing({
 
         <div className="flex gap-6 items-start">
           {/* Desktop sidebar */}
-          <div className="hidden lg:block w-72 flex-shrink-0 sticky top-28">
+          <div className="hidden lg:block w-72 flex-shrink-0 sticky top-28 self-start">
             <ProductFiltersSidebar
               filters={filters}
               meta={meta}
               onChange={handleFilterChange}
+              className="max-h-[calc(100vh-7rem)]"
             />
           </div>
 
