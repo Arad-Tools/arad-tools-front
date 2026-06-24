@@ -10,12 +10,15 @@ interface Props {
   basePath?: string;
 }
 
+const EXCLUDED_TAB_SLUGS = new Set(['plumbing', 'paint', 'garden']);
+
 export default function CategoryTabs({
   categories,
   activeSlugs = [],
   basePath = '/products',
 }: Props) {
   const isAllActive = activeSlugs.length === 0;
+  const visibleCategories = categories.filter((cat) => !EXCLUDED_TAB_SLUGS.has(cat.slug));
 
   return (
     <div className="border-b border-gray-200 bg-white">
@@ -33,7 +36,7 @@ export default function CategoryTabs({
             همه محصولات
           </Link>
 
-          {categories.map((cat) => {
+          {visibleCategories.map((cat) => {
             const active = activeSlugs.includes(cat.slug);
 
             return (
