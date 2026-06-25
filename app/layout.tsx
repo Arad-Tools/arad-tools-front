@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import { Vazirmatn } from 'next/font/google';
 import { CartProvider } from '@/lib/stores/cart-context';
+import { AuthProvider } from '@/lib/stores/auth-context';
 import '@/app/globals.css';
 
 // ── Persian-optimised font ────────────────────────────────────────────────────
@@ -44,9 +45,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     // lang="fa" + dir="rtl" — both are required for correct RTL support
     <html lang="fa" dir="rtl" className={`${vazirmatn.variable} scroll-smooth`}>
       <body className={`${vazirmatn.className} min-h-screen bg-gray-50 text-gray-900 antialiased`}>
-        <CartProvider>
-          {children}
-        </CartProvider>
+        <AuthProvider>
+          <CartProvider>
+            {children}
+          </CartProvider>
+        </AuthProvider>
       </body>
     </html>
   );

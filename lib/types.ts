@@ -233,3 +233,20 @@ export interface CategoryStripProps {
 export interface HeroBannerProps {
   banners: HeroBannerItem[];
 }
+
+// ─── Customer Auth ────────────────────────────────────────────────────────────
+
+export interface Customer {
+  id: number;
+  mobile: string;
+  name: string | null;
+  email: string | null;
+  profile_complete: boolean;
+}
+
+export interface AuthResponse {
+  token: string;
+  customer: Customer;
+  message?: string;
+}
+

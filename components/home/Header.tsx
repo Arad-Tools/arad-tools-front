@@ -7,6 +7,9 @@ import {
 } from 'lucide-react';
 import { toPersianDigits } from '@/lib/utils';
 import { useCart } from '@/lib/stores/cart-context';
+import { useAuth } from '@/lib/stores/auth-context';
+import ProfileMenu from '@/components/auth/ProfileMenu';
+import LoginModal from '@/components/auth/LoginModal';
 
 const NAV_LINKS = [
   { label: 'ابزار برقی',     href: '/category/power-tools'  },
@@ -20,6 +23,7 @@ const NAV_LINKS = [
 export default function Header() {
   const [menuOpen,   setMenuOpen]   = useState(false);
   const { count: cartCount } = useCart();
+  const { isAuthenticated, hydrated, openLogin, logout } = useAuth();
 
   return (
     <header className="sticky top-0 z-50 shadow-md">
@@ -92,10 +96,19 @@ export default function Header() {
               </Link>
 
               {/* User */}
-              <Link href="/login" className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-brand rounded-lg text-sm font-medium hover:bg-brand-700 transition-colors" aria-label="ورود و ثبت‌نام">
-                <User className="w-4 h-4" />
-                <span>ورود</span>
-              </Link>
+              {hydrated && isAuthenticated ? (
+                <ProfileMenu />
+              ) : (
+                <button
+                  type="button"
+                  onClick={openLogin}
+                  className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-brand rounded-lg text-sm font-medium hover:bg-brand-700 transition-colors"
+                  aria-label="ورود و ثبت‌نام"
+                >
+                  <User className="w-4 h-4" />
+                  <span>ورود</span>
+                </button>
+              )}
 
               {/* Mobile menu toggle */}
               <button
@@ -188,19 +201,39 @@ export default function Header() {
               ))}
             </ul>
 
-            <div className="p-4 mt-2">
-              <Link
-                href="/login"
-                onClick={() => setMenuOpen(false)}
-                className="btn-primary w-full flex items-center justify-center gap-2"
-              >
-                <User className="w-4 h-4" />
-                ورود / ثبت‌نام
-              </Link>
+            <div className="p-4 mt-2 space-y-2">
+              {hydrated && isAuthenticated ? (
+                <>
+                  <Link href="/dashboard" onClick={() => setMenuOpen(false)} className="btn-outline w-full flex items-center justify-center gap-2">
+                    داشبورد
+                  </Link>
+                  <Link href="/cart" onClick={() => setMenuOpen(false)} className="btn-outline w-full flex items-center justify-center gap-2">
+                    سبد خرید
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={() => { setMenuOpen(false); void logout(); }}
+                    className="w-full text-sm text-red-600 py-2.5"
+                  >
+                    خروج
+                  </button>
+                </>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => { setMenuOpen(false); openLogin(); }}
+                  className="btn-primary w-full flex items-center justify-center gap-2"
+                >
+                  <User className="w-4 h-4" />
+                  ورود / ثبت‌نام
+                </button>
+              )}
             </div>
           </div>
         </>
       )}
+
+      <LoginModal />
     </header>
   );
 }
