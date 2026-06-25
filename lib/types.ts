@@ -87,6 +87,7 @@ export interface Video {
   title: string;
   thumbnail: string;
   videoUrl: string;
+  embedUrl?: string;
   productId?: string;
   duration: string; // e.g. "۴:۳۲"
 }

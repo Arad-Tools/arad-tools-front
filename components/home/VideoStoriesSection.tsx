@@ -1,6 +1,6 @@
 import { ChevronLeft } from 'lucide-react';
 import Link from 'next/link';
-import StoryCard from './StoryCard';
+import VideoStoriesClient from './VideoStoriesClient';
 import type { VideoStoriesSectionProps } from '@/lib/types';
 
 export default function VideoStoriesSection({ videos }: VideoStoriesSectionProps) {
@@ -12,7 +12,6 @@ export default function VideoStoriesSection({ videos }: VideoStoriesSectionProps
       aria-label="ویدیوها و آموزش‌ها"
     >
       <div className="container mx-auto px-4">
-        {/* ── Header ─────────────────────────────────────────────────────── */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
             <div className="w-1 h-7 rounded-full bg-brand flex-shrink-0" aria-hidden />
@@ -30,22 +29,7 @@ export default function VideoStoriesSection({ videos }: VideoStoriesSectionProps
           </Link>
         </div>
 
-        {/* ── Horizontal Scroll ──────────────────────────────────────────── */}
-        {/*
-          RTL note: overflow-x-auto here starts scrolling from the right side.
-          The first video card appears at the rightmost position — correct for Persian UX.
-        */}
-        <div
-          className="flex gap-4 overflow-x-auto scrollbar-hide pb-2"
-          role="list"
-          aria-label="لیست ویدیوها"
-        >
-          {videos.map((video) => (
-            <div key={video.id} role="listitem">
-              <StoryCard video={video} />
-            </div>
-          ))}
-        </div>
+        <VideoStoriesClient videos={videos} />
       </div>
     </section>
   );

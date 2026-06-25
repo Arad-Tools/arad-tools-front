@@ -6,6 +6,16 @@ const remotePatterns: NonNullable<NextConfig["images"]>["remotePatterns"] = [
     hostname: "placehold.co",
   },
   {
+    protocol: "https",
+    hostname: "www.aparat.com",
+    pathname: "/video/video/thumb/**",
+  },
+  {
+    protocol: "https",
+    hostname: "static.cdn.asset.aparat.com",
+    pathname: "/**",
+  },
+  {
     protocol: "http",
     hostname: "localhost",
     port: "8000",
