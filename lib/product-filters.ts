@@ -164,6 +164,9 @@ export function removeActiveFilter(
     case 'min_rating':
       delete next.min_rating;
       break;
+    case 'q':
+      delete next.q;
+      break;
     case 'on_sale':
     case 'featured':
     case 'bestseller':

@@ -4,30 +4,41 @@ import { ChevronLeft } from 'lucide-react';
 import type { BrandSectionProps } from '@/lib/types';
 import { toPersianDigits } from '@/lib/utils';
 
-export default function BrandSection({ brands }: BrandSectionProps) {
+export default function BrandSection({
+  brands,
+  showAllLink = true,
+  embedded = false,
+}: BrandSectionProps & { showAllLink?: boolean; embedded?: boolean }) {
   if (brands.length === 0) return null;
 
   return (
-    <section className="bg-white py-12 border-t border-gray-100" aria-label="برندهای معتبر">
-      <div className="container mx-auto px-4">
+    <section
+      className={embedded ? '' : 'bg-white py-12 border-t border-gray-100'}
+      aria-label="برندهای معتبر"
+    >
+      <div className={embedded ? '' : 'container mx-auto px-4'}>
 
         {/* ── Header ─────────────────────────────────────────────────────── */}
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-3">
-            <div className="w-1 h-7 rounded-full bg-navy-800 flex-shrink-0" aria-hidden />
-            <div>
-              <p className="text-xs font-medium text-gray-400 mb-0.5">تامین‌کنندگان رسمی</p>
-              <h2 className="text-lg font-black text-gray-900">برندهای معتبر جهانی</h2>
+        {!embedded && (
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-3">
+              <div className="w-1 h-7 rounded-full bg-navy-800 flex-shrink-0" aria-hidden />
+              <div>
+                <p className="text-xs font-medium text-gray-400 mb-0.5">تامین‌کنندگان رسمی</p>
+                <h2 className="text-lg font-black text-gray-900">برندهای معتبر جهانی</h2>
+              </div>
             </div>
+            {showAllLink && (
+              <Link
+                href="/brands"
+                className="flex items-center gap-1 text-sm font-semibold text-navy-800 hover:text-brand transition-colors"
+              >
+                همه برندها
+                <ChevronLeft className="w-4 h-4" />
+              </Link>
+            )}
           </div>
-          <Link
-            href="/brands"
-            className="flex items-center gap-1 text-sm font-semibold text-navy-800 hover:text-brand transition-colors"
-          >
-            همه برندها
-            <ChevronLeft className="w-4 h-4" />
-          </Link>
-        </div>
+        )}
 
         {/* ── Brand Grid ─────────────────────────────────────────────────── */}
         <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3">

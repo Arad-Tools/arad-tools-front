@@ -41,7 +41,7 @@ export default async function HomePage() {
   const allProducts   = resolve(products,   []);
   const allVideos     = resolve(videos,     []);
   const allPosts      = resolve(posts,      []);
-  const allBrands     = resolve(brands,     []);
+  const allBrands     = resolve(brands,     []).filter((brand) => brand.featured);
   const allCategories = resolve(categories, []);
   const allBanners    = resolve(banners,    []);
 

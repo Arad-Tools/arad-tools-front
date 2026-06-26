@@ -1,15 +1,16 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 import Link from 'next/link';
 import {
-  Search, ShoppingCart, User, Menu, X, Phone, ChevronDown,
+  ShoppingCart, User, Menu, X, Phone, ChevronDown,
 } from 'lucide-react';
 import { toPersianDigits } from '@/lib/utils';
 import { useCart } from '@/lib/stores/cart-context';
 import { useAuth } from '@/lib/stores/auth-context';
 import ProfileMenu from '@/components/auth/ProfileMenu';
 import LoginModal from '@/components/auth/LoginModal';
+import SearchForm from '@/components/search/SearchForm';
 
 const NAV_LINKS = [
   { label: 'ابزار برقی',     href: '/category/power-tools'  },
@@ -64,19 +65,9 @@ export default function Header() {
 
             {/* ── Search — center ─────────────────────────────────────────── */}
             <div className="flex-1 max-w-xl mx-auto">
-              <div className="relative">
-                <Search className="absolute top-1/2 -translate-y-1/2 end-3 text-gray-400 w-4 h-4 pointer-events-none" />
-                <input
-                  type="search"
-                  placeholder="جستجو در ابزار، برند و دسته‌بندی..."
-                  className="
-                    w-full bg-white/10 border border-white/20 rounded-xl
-                    pe-10 ps-4 py-2.5 text-sm text-white placeholder:text-gray-400
-                    focus:outline-none focus:ring-2 focus:ring-brand/70 focus:bg-white/15
-                    transition-all duration-200
-                  "
-                />
-              </div>
+              <Suspense fallback={null}>
+                <SearchForm />
+              </Suspense>
             </div>
 
             {/* ── Actions — end (left in RTL) ─────────────────────────────── */}
@@ -174,14 +165,9 @@ export default function Header() {
 
             {/* Search in mobile */}
             <div className="p-4 border-b">
-              <div className="relative">
-                <Search className="absolute top-1/2 -translate-y-1/2 end-3 text-gray-400 w-4 h-4" />
-                <input
-                  type="search"
-                  placeholder="جستجو..."
-                  className="w-full border border-gray-200 rounded-xl pe-10 ps-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand/50"
-                />
-              </div>
+              <Suspense fallback={null}>
+                <SearchForm variant="mobile" onSubmit={() => setMenuOpen(false)} />
+              </Suspense>
             </div>
 
             {/* Mobile nav links */}

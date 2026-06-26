@@ -302,6 +302,36 @@ export async function getBrands(): Promise<Brand[]> {
   return safeFetchList('/brands', mockBrands, 3600);
 }
 
+/** revalidate: 1 h — single brand page */
+export async function getBrand(slug: string): Promise<Brand | null> {
+  if (!API_BASE) {
+    return mockBrands.find((brand) => brand.slug === slug) ?? null;
+  }
+
+  try {
+    const res = await fetch(`${API_BASE}/brands/${slug}`, {
+      next: { revalidate: 3600 },
+    });
+
+    if (res.status === 404) {
+      return null;
+    }
+
+    if (!res.ok) {
+      throw new Error(`HTTP ${res.status}`);
+    }
+
+    const json: unknown = await res.json();
+    const data = json && typeof json === 'object' && 'data' in json
+      ? (json as { data: Brand }).data
+      : (json as Brand);
+
+    return data ?? null;
+  } catch {
+    return mockBrands.find((brand) => brand.slug === slug) ?? null;
+  }
+}
+
 /** revalidate: 1 h — categories rarely change */
 export async function getCategories(): Promise<Category[]> {
   return safeFetchList('/categories', mockCategories, 3600);

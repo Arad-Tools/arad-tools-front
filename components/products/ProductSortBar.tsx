@@ -1,6 +1,7 @@
 'use client';
 
-import { ChevronDown, SlidersHorizontal } from 'lucide-react';
+import { useEffect, useState, type FormEvent } from 'react';
+import { ChevronDown, Search, SlidersHorizontal } from 'lucide-react';
 import type { ProductFilters, ProductFilterMeta } from '@/lib/types';
 import { SORT_LABELS } from '@/lib/product-filters';
 import { toPersianDigits } from '@/lib/utils';
@@ -18,8 +19,37 @@ export default function ProductSortBar({
   onChange,
   onToggleMobileFilters,
 }: Props) {
+  const [query, setQuery] = useState(filters.q ?? '');
+
+  useEffect(() => {
+    setQuery(filters.q ?? '');
+  }, [filters.q]);
+
+  const handleSearch = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const trimmed = query.trim();
+
+    onChange({
+      ...filters,
+      q: trimmed || undefined,
+      page: 1,
+    });
+  };
+
   return (
-    <div className="flex flex-wrap items-center justify-between gap-3 bg-white rounded-2xl border border-gray-100 px-4 py-3 shadow-sm">
+    <div className="space-y-3">
+      <form onSubmit={handleSearch} className="relative">
+        <Search className="absolute top-1/2 -translate-y-1/2 end-3 w-4 h-4 text-gray-400 pointer-events-none" />
+        <input
+          type="search"
+          value={query}
+          onChange={(event) => setQuery(event.target.value)}
+          placeholder="جستجو در محصولات..."
+          className="w-full rounded-2xl border border-gray-100 bg-white px-4 py-3 pe-10 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-brand/30"
+        />
+      </form>
+
+      <div className="flex flex-wrap items-center justify-between gap-3 bg-white rounded-2xl border border-gray-100 px-4 py-3 shadow-sm">
       <div className="flex items-center gap-3">
         <button
           type="button"
@@ -48,6 +78,7 @@ export default function ProductSortBar({
           ))}
         </select>
         <ChevronDown className="absolute top-1/2 -translate-y-1/2 end-3 w-4 h-4 text-gray-400 pointer-events-none" />
+      </div>
       </div>
     </div>
   );

@@ -125,9 +125,17 @@ export default function ProductListing({
       <div className="container mx-auto px-4 py-6">
         {/* Page header */}
         <div className="mb-6">
-          <h1 className="text-2xl font-black text-gray-900">{preset?.title ?? 'محصولات'}</h1>
-          {preset?.subtitle && (
-            <p className="text-sm text-gray-500 mt-1">{preset.subtitle}</p>
+          <h1 className="text-2xl font-black text-gray-900">
+            {filters.q
+              ? `نتایج جستجو برای «${filters.q}»`
+              : (preset?.title ?? 'محصولات')}
+          </h1>
+          {(preset?.subtitle || filters.q) && (
+            <p className="text-sm text-gray-500 mt-1">
+              {filters.q
+                ? `${toPersianDigits(pagination.total)} محصول یافت شد`
+                : preset?.subtitle}
+            </p>
           )}
         </div>
 
