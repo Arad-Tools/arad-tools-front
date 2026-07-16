@@ -27,6 +27,7 @@ function resolve<T>(result: PromiseSettledResult<T>, fallback: T): T {
 
 // ── Page Component (Server Component) ────────────────────────────────────────
 export default async function HomePage() {
+  console.log('HomePage He he heee...');
   // All sections fetch in parallel. If one fails it falls back gracefully.
   const [products, videos, posts, brands, categories, banners] =
     await Promise.allSettled([
