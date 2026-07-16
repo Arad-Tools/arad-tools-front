@@ -1,7 +1,7 @@
 import Image from 'next/image';
 import { Play } from 'lucide-react';
 import type { Video } from '@/lib/types';
-import { truncate } from '@/lib/utils';
+import { truncate, productImage } from '@/lib/utils';
 
 interface Props {
   video: Video;
@@ -25,7 +25,7 @@ export default function StoryCard({ video, onClick }: Props) {
     >
       <div className="relative rounded-xl overflow-hidden aspect-[9/6] bg-gray-100 shadow-md group-hover:shadow-xl transition-all duration-300 group-hover:-translate-y-1">
         <Image
-          src={video.thumbnail || 'https://placehold.co/600x400?text=Loading'}
+          src={productImage(video.thumbnail)}
           alt={video.title}
           fill
           sizes="(max-width: 640px) 176px, 208px"

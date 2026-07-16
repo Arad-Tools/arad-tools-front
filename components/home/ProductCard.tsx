@@ -3,7 +3,7 @@ import Image from 'next/image';
 import { Star, ShoppingCart, Package } from 'lucide-react';
 import type { Product } from '@/lib/types';
 import {
-  formatToman, renderBadgeLabel, calcDiscount, toPersianDigits, cn,
+  formatToman, renderBadgeLabel, calcDiscount, toPersianDigits, cn, productImage,
 } from '@/lib/utils';
 
 interface Props {
@@ -21,7 +21,7 @@ export default function ProductCard({ product, priority = false }: Props) {
       {/* ── Image ─────────────────────────────────────────────────────────── */}
       <Link href={`/product/${product.slug}`} className="block overflow-hidden bg-gray-50 aspect-square relative" tabIndex={-1} aria-hidden>
         <Image
-          src={product.image || 'https://placehold.co/600x400?text=Loading'}
+          src={productImage(product.image)}
           alt={product.title}
           fill
           sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"

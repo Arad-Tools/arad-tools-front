@@ -3,10 +3,6 @@ import type { NextConfig } from "next";
 const remotePatterns: NonNullable<NextConfig["images"]>["remotePatterns"] = [
   {
     protocol: "https",
-    hostname: "placehold.co",
-  },
-  {
-    protocol: "https",
     hostname: "www.aparat.com",
     pathname: "/video/video/thumb/**",
   },

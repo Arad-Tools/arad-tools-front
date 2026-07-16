@@ -2,7 +2,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Clock } from 'lucide-react';
 import type { BlogPost } from '@/lib/types';
-import { toPersianDigits, truncate } from '@/lib/utils';
+import { toPersianDigits, truncate, productImage } from '@/lib/utils';
 
 interface Props {
   post: BlogPost;
@@ -17,7 +17,7 @@ export default function BlogCard({ post, featured = false }: Props) {
       <Link href={`/blog/${post.slug}`} className="block overflow-hidden flex-shrink-0" tabIndex={-1} aria-hidden>
         <div className={`relative w-full bg-gray-100 overflow-hidden ${featured ? 'aspect-[16/9]' : 'aspect-[4/3]'}`}>
           <Image
-            src={post.image || 'https://placehold.co/600x400?text=Loading'}
+            src={productImage(post.image)}
             alt={post.title}
             fill
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"

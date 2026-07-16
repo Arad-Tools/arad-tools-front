@@ -3,7 +3,7 @@
 import { useCallback, useRef, useState } from 'react';
 import Image from 'next/image';
 import { Play, ZoomIn } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn, productImage } from '@/lib/utils';
 
 interface Props {
   images: string[];
@@ -12,7 +12,9 @@ interface Props {
 }
 
 export default function ProductGallery({ images, title, videoUrl }: Props) {
-  const gallery = images.length > 0 ? images : ['https://placehold.co/800x800?text=No+Image'];
+  const gallery = images.length > 0
+    ? images.map((src) => productImage(src))
+    : [productImage()];
   const [activeIndex, setActiveIndex] = useState(0);
   const [zoomed, setZoomed] = useState(false);
   const touchStartX = useRef(0);

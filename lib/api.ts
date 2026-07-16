@@ -4,6 +4,14 @@ import type {
   ProductDetail, ProductReview,
 } from './types';
 import { buildFilterQueryString } from './product-filters';
+import {
+  normalizeBlogPost,
+  normalizeBrand,
+  normalizeHeroBanner,
+  normalizeProduct,
+  normalizeProductDetail,
+  normalizeVideo,
+} from './media';
 
 // ─── Mock Data ────────────────────────────────────────────────────────────────
 // Used as fallback when API_BASE is unset or the API returns an error.
@@ -22,7 +30,7 @@ const mockProducts: Product[] = [
     id: '1',
     title: 'دریل چکشی بوش GSB 750 RE',
     slug: 'bosch-gsb-750-re',
-    image: 'https://placehold.co/400x400/1a2e44/ffffff?text=%D8%AF%D8%B1%DB%8C%D9%84+%D8%A8%D9%88%D8%B4',
+    image: '',
     price: 4_850_000,
     oldPrice: 5_600_000,
     badge: 'sale',
@@ -36,7 +44,7 @@ const mockProducts: Product[] = [
     id: '2',
     title: 'فرز آنگولار ماکیتا GA5040C',
     slug: 'makita-ga5040c',
-    image: 'https://placehold.co/400x400/2d4a22/ffffff?text=%D9%81%D8%B1%D8%B2+%D9%85%D8%A7%DA%A9%DB%8C%D8%AA%D8%A7',
+    image: '',
     price: 3_200_000,
     oldPrice: 3_800_000,
     badge: 'sale',
@@ -50,7 +58,7 @@ const mockProducts: Product[] = [
     id: '3',
     title: 'پیچ‌گوشتی شارژی ماکیتا DF488D 18V',
     slug: 'makita-df488d',
-    image: 'https://placehold.co/400x400/1a3a5f/ffffff?text=%D9%BE%DB%8C%DA%86%DA%AF%D9%88%D8%B4%D8%AA%DB%8C',
+    image: '',
     price: 6_450_000,
     badge: 'bestseller',
     rating: 4.9,
@@ -63,7 +71,7 @@ const mockProducts: Product[] = [
     id: '4',
     title: 'لول لیزری بوش GLL 3-80 Professional',
     slug: 'bosch-gll-3-80',
-    image: 'https://placehold.co/400x400/3a1f5f/ffffff?text=%D9%84%D9%88%D9%84+%D9%84%DB%8C%D8%B2%D8%B1%DB%8C',
+    image: '',
     price: 8_900_000,
     oldPrice: 10_200_000,
     badge: 'sale',
@@ -77,7 +85,7 @@ const mockProducts: Product[] = [
     id: '5',
     title: 'آچار پنوماتیک هیلتی SFH22-A',
     slug: 'hilti-sfh22a',
-    image: 'https://placehold.co/400x400/4a1520/ffffff?text=%D8%A2%DA%86%D8%A7%D8%B1+%D9%87%DB%8C%D9%84%D8%AA%DB%8C',
+    image: '',
     price: 12_750_000,
     badge: 'featured',
     rating: 4.8,
@@ -90,7 +98,7 @@ const mockProducts: Product[] = [
     id: '6',
     title: 'اره برقی رونده بلک‌اند‌دکر KS701E',
     slug: 'bnd-ks701e',
-    image: 'https://placehold.co/400x400/1f3f1f/ffffff?text=%D8%A7%D8%B1%D9%87+%D8%A8%D8%B1%D9%82%DB%8C',
+    image: '',
     price: 2_100_000,
     oldPrice: 2_500_000,
     badge: 'new',
@@ -104,7 +112,7 @@ const mockProducts: Product[] = [
     id: '7',
     title: 'مته SDS Plus هیلتی TE 6-A36',
     slug: 'hilti-te6-a36',
-    image: 'https://placehold.co/400x400/2f1f3f/ffffff?text=%D9%85%D8%AA%D9%87+SDS',
+    image: '',
     price: 18_500_000,
     badge: 'featured',
     rating: 4.9,
@@ -117,7 +125,7 @@ const mockProducts: Product[] = [
     id: '8',
     title: 'کمپرسور هوا ۵۰ لیتری بوش Professional',
     slug: 'bosch-compressor-50l',
-    image: 'https://placehold.co/400x400/1f2f3f/ffffff?text=%DA%A9%D9%85%D9%BE%D8%B1%D8%B3%D9%88%D8%B1',
+    image: '',
     price: 9_200_000,
     oldPrice: 10_800_000,
     badge: 'sale',
@@ -133,7 +141,7 @@ const mockVideos: Video[] = [
   {
     id: '1',
     title: 'آموزش صحیح استفاده از دریل چکشی',
-    thumbnail: 'https://placehold.co/320x200/1a2e44/ffffff?text=%D8%A2%D9%85%D9%88%D8%B2%D8%B4+%D8%AF%D8%B1%DB%8C%D9%84',
+    thumbnail: '',
     videoUrl: '#',
     productId: '1',
     duration: '۴:۳۲',
@@ -141,7 +149,7 @@ const mockVideos: Video[] = [
   {
     id: '2',
     title: 'فرز آنگولار؛ تکنیک‌های سنگ‌زنی حرفه‌ای',
-    thumbnail: 'https://placehold.co/320x200/2d4a22/ffffff?text=%D8%B3%D9%86%DA%AF+%D8%B2%D9%86%DB%8C',
+    thumbnail: '',
     videoUrl: '#',
     productId: '2',
     duration: '۶:۱۵',
@@ -149,21 +157,21 @@ const mockVideos: Video[] = [
   {
     id: '3',
     title: 'معرفی خط کامل محصولات ماکیتا ۱۴۰۳',
-    thumbnail: 'https://placehold.co/320x200/3a2040/ffffff?text=%D9%85%D8%A7%DA%A9%DB%8C%D8%AA%D8%A7+%DB%B1%DB%B4%DB%B0%DB%B3',
+    thumbnail: '',
     videoUrl: '#',
     duration: '۸:۴۸',
   },
   {
     id: '4',
     title: 'نکات ایمنی ضروری در جوشکاری',
-    thumbnail: 'https://placehold.co/320x200/402020/ffffff?text=%D8%A7%DB%8C%D9%85%D9%86%DB%8C+%D8%AC%D9%88%D8%B4%DA%A9%D8%A7%D8%B1%DB%8C',
+    thumbnail: '',
     videoUrl: '#',
     duration: '۵:۰۲',
   },
   {
     id: '5',
     title: 'راهنمای انتخاب بیت و مته مناسب',
-    thumbnail: 'https://placehold.co/320x200/204030/ffffff?text=%D8%A7%D9%86%D8%AA%D8%AE%D8%A7%D8%A8+%D9%85%D8%AA%D9%87',
+    thumbnail: '',
     videoUrl: '#',
     duration: '۳:۵۵',
   },
@@ -175,7 +183,7 @@ const mockBlogPosts: BlogPost[] = [
     title: 'راهنمای جامع خرید دریل برقی برای مصارف خانگی و صنعتی',
     excerpt:
       'انتخاب دریل مناسب به نوع کار و نیاز شما بستگی دارد. در این راهنما تفاوت انواع دریل‌های برقی، شارژی و چکشی را با هم بررسی می‌کنیم تا بهترین انتخاب را داشته باشید.',
-    image: 'https://placehold.co/600x400/1a2e44/ffffff?text=%D8%B1%D8%A7%D9%87%D9%86%D9%85%D8%A7%DB%8C+%D8%AE%D8%B1%DB%8C%D8%AF',
+    image: '',
     slug: 'drill-buying-guide',
     category: 'راهنمای خرید',
     readTime: 7,
@@ -185,7 +193,7 @@ const mockBlogPosts: BlogPost[] = [
     title: 'مقایسه بوش و ماکیتا: کدام برند برای کار شما مناسب‌تر است؟',
     excerpt:
       'بوش و ماکیتا هر دو از بزرگ‌ترین تولیدکنندگان ابزار صنعتی در جهان هستند. در این مقاله به صورت دقیق بررسی می‌کنیم کدام یک برای نوع کار شما مناسب‌تر است.',
-    image: 'https://placehold.co/600x400/2d4a22/ffffff?text=%D9%85%D9%82%D8%A7%DB%8C%D8%B3%D9%87+%D8%A8%D8%B1%D9%86%D8%AF',
+    image: '',
     slug: 'bosch-vs-makita',
     category: 'مقایسه برند',
     readTime: 9,
@@ -195,7 +203,7 @@ const mockBlogPosts: BlogPost[] = [
     title: '۱۰ نکته طلایی برای نگهداری از ابزار برقی و افزایش عمر آن‌ها',
     excerpt:
       'نگهداری صحیح از ابزار، عمر مفید و عملکرد آن را به طور چشمگیری افزایش می‌دهد. این ۱۰ نکته ساده و کاربردی را برای مراقبت از ابزارهایتان رعایت کنید.',
-    image: 'https://placehold.co/600x400/3a2020/ffffff?text=%D9%86%DA%AF%D9%87%D8%AF%D8%A7%D8%B1%DB%8C',
+    image: '',
     slug: 'tool-maintenance-tips',
     category: 'آموزش و نگهداری',
     readTime: 5,
@@ -203,12 +211,12 @@ const mockBlogPosts: BlogPost[] = [
 ];
 
 const mockBrands: Brand[] = [
-  { id: '1', name: 'بوش',          logo: 'https://placehold.co/140x70/f8f9fa/1a2e44?text=BOSCH',        slug: 'bosch',         featured: true,  productCount: 145 },
-  { id: '2', name: 'ماکیتا',       logo: 'https://placehold.co/140x70/f8f9fa/004d98?text=MAKITA',        slug: 'makita',        featured: true,  productCount: 203 },
-  { id: '3', name: 'هیلتی',        logo: 'https://placehold.co/140x70/f8f9fa/cc0000?text=HILTI',         slug: 'hilti',         featured: true,  productCount: 87  },
-  { id: '4', name: 'استنلی',       logo: 'https://placehold.co/140x70/f8f9fa/d97706?text=STANLEY',       slug: 'stanley',       featured: true,  productCount: 124 },
-  { id: '5', name: 'بلک‌اند‌دکر', logo: 'https://placehold.co/140x70/f8f9fa/111827?text=BLACK%2BDECKER', slug: 'black-decker',  featured: true,  productCount: 96  },
-  { id: '6', name: 'دورادو',       logo: 'https://placehold.co/140x70/f8f9fa/166534?text=DURADO',        slug: 'durado',        featured: false, productCount: 78  },
+  { id: '1', name: 'بوش',          logo: '', slug: 'bosch',         featured: true,  productCount: 145 },
+  { id: '2', name: 'ماکیتا',       logo: '', slug: 'makita',        featured: true,  productCount: 203 },
+  { id: '3', name: 'هیلتی',        logo: '', slug: 'hilti',         featured: true,  productCount: 87  },
+  { id: '4', name: 'استنلی',       logo: '', slug: 'stanley',       featured: true,  productCount: 124 },
+  { id: '5', name: 'بلک‌اند‌دکر', logo: '', slug: 'black-decker',  featured: true,  productCount: 96  },
+  { id: '6', name: 'دورادو',       logo: '', slug: 'durado',        featured: false, productCount: 78  },
 ];
 
 const mockHeroBanners: HeroBannerItem[] = [
@@ -216,7 +224,7 @@ const mockHeroBanners: HeroBannerItem[] = [
     id: '1',
     title: 'ابزار حرفه‌ای برای کار حرفه‌ای',
     subtitle: 'بهترین برندهای جهانی با قیمت رقابتی و تحویل سریع',
-    image: 'https://placehold.co/800x500/1a2e44/ffffff?text=Hero+Banner',
+    image: '',
     ctaText: 'مشاهده محصولات',
     ctaLink: '/products',
     badge: 'تخفیف تا ۳۰٪',
@@ -226,7 +234,7 @@ const mockHeroBanners: HeroBannerItem[] = [
     id: '2',
     title: 'ماکیتا ۱۸ ولت — انقلاب شارژی',
     subtitle: 'کامل‌ترین خط محصولات ۱۸ ولت با گارانتی اصل',
-    image: 'https://placehold.co/800x500/004d98/ffffff?text=Makita+18V',
+    image: '',
     ctaText: 'خرید کنید',
     ctaLink: '/brands/makita',
     badge: 'جدید',
@@ -255,10 +263,11 @@ async function safeFetchList<T>(
   path: string,
   fallback: T[],
   revalidate = 300,
+  normalize?: (item: T) => T,
 ): Promise<T[]> {
   if (!API_BASE) {
     console.warn(`[API] NEXT_PUBLIC_API_URL is unset — using mock data for ${path}`);
-    return fallback;
+    return fallback.map((item) => normalize?.(item) ?? item);
   }
   try {
     const res = await fetch(`${API_BASE}${path}`, {
@@ -273,10 +282,10 @@ async function safeFetchList<T>(
         throw new Error('Unexpected response shape');
       }
     }
-    return items;
+    return items.map((item) => normalize?.(item) ?? item);
   } catch (err) {
     console.warn(`[API] ${path} failed — using mock data.`, err);
-    return fallback;
+    return fallback.map((item) => normalize?.(item) ?? item);
   }
 }
 
@@ -284,28 +293,29 @@ async function safeFetchList<T>(
 
 /** revalidate: 5 min — products change moderately often */
 export async function getProducts(): Promise<Product[]> {
-  return safeFetchList('/products', mockProducts, 300);
+  return safeFetchList('/products', mockProducts, 300, normalizeProduct);
 }
 
 /** revalidate: 1 h — videos rarely change */
 export async function getVideos(): Promise<Video[]> {
-  return safeFetchList('/videos', mockVideos, 3600);
+  return safeFetchList('/videos', mockVideos, 3600, normalizeVideo);
 }
 
 /** revalidate: 10 min — editorial content updated daily */
 export async function getBlogPosts(): Promise<BlogPost[]> {
-  return safeFetchList('/blog', mockBlogPosts, 600);
+  return safeFetchList('/blog', mockBlogPosts, 600, normalizeBlogPost);
 }
 
 /** revalidate: 1 h — brand list is stable */
 export async function getBrands(): Promise<Brand[]> {
-  return safeFetchList('/brands', mockBrands, 3600);
+  return safeFetchList('/brands', mockBrands, 3600, normalizeBrand);
 }
 
 /** revalidate: 1 h — single brand page */
 export async function getBrand(slug: string): Promise<Brand | null> {
   if (!API_BASE) {
-    return mockBrands.find((brand) => brand.slug === slug) ?? null;
+    const brand = mockBrands.find((item) => item.slug === slug) ?? null;
+    return brand ? normalizeBrand(brand) : null;
   }
 
   try {
@@ -326,9 +336,10 @@ export async function getBrand(slug: string): Promise<Brand | null> {
       ? (json as { data: Brand }).data
       : (json as Brand);
 
-    return data ?? null;
+    return data ? normalizeBrand(data) : null;
   } catch {
-    return mockBrands.find((brand) => brand.slug === slug) ?? null;
+    const brand = mockBrands.find((item) => item.slug === slug) ?? null;
+    return brand ? normalizeBrand(brand) : null;
   }
 }
 
@@ -339,7 +350,7 @@ export async function getCategories(): Promise<Category[]> {
 
 /** revalidate: 30 min — banners updated for campaigns */
 export async function getHeroBanners(): Promise<HeroBannerItem[]> {
-  return safeFetchList('/banners', mockHeroBanners, 1800);
+  return safeFetchList('/banners', mockHeroBanners, 1800, normalizeHeroBanner);
 }
 
 // ─── Paginated / Filtered Products ────────────────────────────────────────────
@@ -363,7 +374,7 @@ function unwrapPaginatedProducts(json: unknown): PaginatedProducts {
     const meta = payload.meta;
 
     return {
-      products,
+      products: products.map(normalizeProduct),
       meta: {
         currentPage: meta?.current_page ?? 1,
         lastPage: meta?.last_page ?? 1,
@@ -373,7 +384,7 @@ function unwrapPaginatedProducts(json: unknown): PaginatedProducts {
     };
   }
 
-  const products = unwrapApiList<Product>(json);
+  const products = unwrapApiList<Product>(json).map(normalizeProduct);
   return {
     products,
     meta: { currentPage: 1, lastPage: 1, perPage: products.length, total: products.length },
@@ -382,7 +393,7 @@ function unwrapPaginatedProducts(json: unknown): PaginatedProducts {
 
 /** Client-side mock filter for offline / fallback mode */
 function filterMockProducts(filters: ProductFilters): PaginatedProducts {
-  let items = [...mockProducts];
+  let items = [...mockProducts.map(normalizeProduct)];
 
   if (filters.q) {
     const q = filters.q.toLowerCase();
@@ -554,12 +565,8 @@ const mockProductDetails: Record<string, ProductDetail> = {
     title: 'دریل چکشی بوش GSB 750 RE',
     slug: 'bosch-gsb-750-re',
     sku: 'BOS-GSB750RE',
-    image: 'https://placehold.co/800x800/1a2e44/ffffff?text=%D8%AF%D8%B1%DB%8C%D9%84+%D8%A8%D9%88%D8%B4',
-    images: [
-      'https://placehold.co/800x800/1a2e44/ffffff?text=%D8%AF%D8%B1%DB%8C%D9%84+%D8%A8%D9%88%D8%B4',
-      'https://placehold.co/800x800/2a3e54/ffffff?text=%D8%B9%DA%A9%D8%B3+2',
-      'https://placehold.co/800x800/3a4e64/ffffff?text=%D8%B9%DA%A9%D8%B3+3',
-    ],
+    image: '',
+    images: [],
     price: 4_850_000,
     oldPrice: 5_600_000,
     discountPercent: 13,
@@ -655,7 +662,8 @@ function buildMockProductDetail(slug: string): ProductDetail | null {
 /** Fetch single product detail by slug */
 export async function getProduct(slug: string): Promise<ProductDetail | null> {
   if (!API_BASE) {
-    return buildMockProductDetail(slug);
+    const detail = buildMockProductDetail(slug);
+    return detail ? normalizeProductDetail(detail) : null;
   }
 
   try {
@@ -667,10 +675,11 @@ export async function getProduct(slug: string): Promise<ProductDetail | null> {
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
     const json = await res.json() as ProductDetail;
-    return json;
+    return normalizeProductDetail(json);
   } catch (err) {
     console.warn(`[API] /products/${slug} failed — using mock.`, err);
-    return buildMockProductDetail(slug);
+    const detail = buildMockProductDetail(slug);
+    return detail ? normalizeProductDetail(detail) : null;
   }
 }
 

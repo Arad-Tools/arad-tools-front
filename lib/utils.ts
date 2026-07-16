@@ -93,10 +93,7 @@ export function formatRating(rating: number): string {
 
 // ─── Images ───────────────────────────────────────────────────────────────────
 
-/** Returns fallback src when image is empty or missing. */
-export function imageFallback(src?: string, fallback = '/images/placeholder.png'): string {
-  return src && src.trim().length > 0 ? src : fallback;
-}
+export { productImage, resolveMediaUrl } from './media';
 
 // ─── Misc ─────────────────────────────────────────────────────────────────────
 

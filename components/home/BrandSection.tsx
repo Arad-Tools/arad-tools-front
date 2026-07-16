@@ -2,7 +2,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { ChevronLeft } from 'lucide-react';
 import type { BrandSectionProps } from '@/lib/types';
-import { toPersianDigits } from '@/lib/utils';
+import { toPersianDigits, productImage } from '@/lib/utils';
 
 export default function BrandSection({
   brands,
@@ -51,13 +51,19 @@ export default function BrandSection({
             >
               {/* Logo container */}
               <div className="relative w-full aspect-[2/1] flex items-center justify-center">
-                <Image
-                  src={brand.logo || 'https://placehold.co/140x70/f8f9fa/1a2e44?text=Brand'}
-                  alt={`لوگوی ${brand.name}`}
-                  fill
-                  sizes="(max-width: 640px) 33vw, (max-width: 1024px) 25vw, 16vw"
-                  className="object-contain group-hover:scale-105 transition-transform duration-200"
-                />
+                {brand.logo ? (
+                  <Image
+                    src={productImage(brand.logo)}
+                    alt={`لوگوی ${brand.name}`}
+                    fill
+                    sizes="(max-width: 640px) 33vw, (max-width: 1024px) 25vw, 16vw"
+                    className="object-contain group-hover:scale-105 transition-transform duration-200"
+                  />
+                ) : (
+                  <span className="text-lg font-black text-gray-400 group-hover:text-brand transition-colors">
+                    {brand.name.slice(0, 2)}
+                  </span>
+                )}
               </div>
 
               {/* Brand name */}
