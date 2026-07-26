@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { useState, Suspense } from 'react';
 import Link from 'next/link';
 import {
@@ -54,9 +55,13 @@ export default function Header() {
 
             {/* ── Logo — start (right in RTL) ─────────────────────────────── */}
             <Link href="/" className="flex items-center gap-2 flex-shrink-0 group" aria-label="ابزار آراد - صفحه اصلی">
-              <div className="w-8 h-8 bg-brand rounded-lg flex items-center justify-center font-black text-white text-sm shadow">
-                ا
-              </div>
+              <Image
+                src="/Arad-logo.webp"
+                alt="لوگوی ابزار آراد"
+                width={32}
+                height={32}
+                className="w-8 h-8 rounded-lg object-cover"
+              />
               <div className="hidden sm:block">
                 <span className="font-black text-xl tracking-tight">ابزار آراد</span>
                 <p className="text-gray-400 text-[10px] leading-none mt-0.5">ابزار و تجهیزات صنعتی</p>

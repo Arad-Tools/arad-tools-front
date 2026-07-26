@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import Link from 'next/link';
 import {
   Phone, Mail, MapPin,
@@ -71,9 +72,13 @@ export default function Footer() {
           <div>
             {/* Logo */}
             <div className="flex items-center gap-2 mb-4">
-              <div className="w-8 h-8 bg-brand rounded-lg flex items-center justify-center font-black text-white text-sm shadow">
-                ا
-              </div>
+              <Image
+                src="/Arad-logo.webp"
+                alt="لوگوی ابزار آراد"
+                width={32}
+                height={32}
+                className="w-8 h-8 rounded-lg object-cover"
+              />
               <span className="font-black text-xl text-white">ابزار آراد</span>
             </div>
             <p className="text-sm text-gray-400 leading-loose mb-5">
