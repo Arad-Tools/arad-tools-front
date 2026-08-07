@@ -1,6 +1,6 @@
 services:
   frontend:
-    image: ghcr.io/Arad-Tools/arad-tools-front:latest
+    image: ghcr.io/arad-tools/arad-tools-front:latest
     ports:
       - "3000:3000"
     restart: unless-stopped
