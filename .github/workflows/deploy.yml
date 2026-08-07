@@ -3,6 +3,10 @@ name: Build and Deploy
 on:
   release:
     types: [published]
+  push:
+    tags:
+      - 'v*'
+      - '[0-9]*'
 
 jobs:
   build-and-push:
