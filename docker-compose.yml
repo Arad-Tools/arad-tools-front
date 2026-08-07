@@ -1,0 +1,16 @@
+services:
+  frontend:
+    image: ghcr.io/Arad-Tools/arad-tools-front:latest
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+    environment:
+      # Use the backend service name as the host inside the Docker network
+      NEXT_PUBLIC_API_URL: http://backend:8000/api
+    networks:
+      - shared-network
+
+networks:
+  shared-network:
+    external: true
+    name: arad-network
