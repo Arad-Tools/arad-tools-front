@@ -54,13 +54,14 @@ export default function Header() {
           <div className="flex items-center gap-4 py-3">
 
             {/* ── Logo — start (right in RTL) ─────────────────────────────── */}
-            <Link href="/" className="flex items-center gap-2 flex-shrink-0 group" aria-label="ابزار آراد - صفحه اصلی">
+            <Link href="/" className="flex items-center gap-3 flex-shrink-0 group" aria-label="ابزار آراد - صفحه اصلی">
               <Image
-                src="/Arad-logo.webp"
+                src="/Arad-logo3.png"
                 alt="لوگوی ابزار آراد"
-                width={32}
-                height={32}
-                className="w-8 h-8 rounded-lg object-cover"
+                width={1536}
+                height={1024}
+                priority
+                className="h-10 sm:h-12 md:h-13 w-auto object-contain transition-transform group-hover:scale-105 duration-200"
               />
               <div className="hidden sm:block">
                 <span className="font-black text-xl tracking-tight">ابزار آراد</span>
@@ -162,7 +163,16 @@ export default function Header() {
             aria-label="منوی موبایل"
           >
             <div className="bg-navy-900 text-white p-4 flex items-center justify-between">
-              <Link href="/" onClick={() => setMenuOpen(false)} className="font-black text-lg">ابزار آراد</Link>
+              <Link href="/" onClick={() => setMenuOpen(false)} className="flex items-center gap-2 font-black text-lg">
+                <Image
+                  src="/Arad-logo3.png"
+                  alt="لوگوی ابزار آراد"
+                  width={1536}
+                  height={1024}
+                  className="h-8 w-auto object-contain"
+                />
+                <span>ابزار آراد</span>
+              </Link>
               <button onClick={() => setMenuOpen(false)} aria-label="بستن منو">
                 <X className="w-5 h-5" />
               </button>

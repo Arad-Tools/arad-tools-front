@@ -71,15 +71,18 @@ export default function Footer() {
           {/* Column 1 — Brand / About */}
           <div>
             {/* Logo */}
-            <div className="flex items-center gap-2 mb-4">
+            <div className="flex items-center gap-3 mb-4">
               <Image
-                src="/Arad-logo.webp"
+                src="/Arad-logo3.png"
                 alt="لوگوی ابزار آراد"
-                width={32}
-                height={32}
-                className="w-8 h-8 rounded-lg object-cover"
+                width={1536}
+                height={1024}
+                className="h-12 sm:h-14 w-auto object-contain drop-shadow"
               />
-              <span className="font-black text-xl text-white">ابزار آراد</span>
+              <div className="flex flex-col">
+                <span className="font-black text-xl text-white tracking-tight">ابزار آراد</span>
+                <span className="text-[11px] text-gray-400">ابزار و تجهیزات صنعتی</span>
+              </div>
             </div>
             <p className="text-sm text-gray-400 leading-loose mb-5">
               ابزار آراد، مرجع تخصصی خرید آنلاین ابزار و تجهیزات صنعتی در ایران. بیش از ۵٬۰۰۰ محصول از بهترین برندهای جهانی با ضمانت اصالت.
