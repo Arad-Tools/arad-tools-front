@@ -1,31 +1,46 @@
 'use client';
 
 import Image from 'next/image';
-import { useState, Suspense } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import {
-  ShoppingCart, User, Menu, X, Phone, ChevronDown,
+  ShoppingCart, User, Menu, X, Phone, ChevronDown, ChevronUp, Layers, Tag, BookOpen,
 } from 'lucide-react';
 import { toPersianDigits } from '@/lib/utils';
 import { useCart } from '@/lib/stores/cart-context';
 import { useAuth } from '@/lib/stores/auth-context';
+import { getCategories } from '@/lib/api';
+import type { Category } from '@/lib/types';
 import ProfileMenu from '@/components/auth/ProfileMenu';
 import LoginModal from '@/components/auth/LoginModal';
 import SearchForm from '@/components/search/SearchForm';
 
-const NAV_LINKS = [
-  { label: 'ابزار برقی',     href: '/category/power-tools'  },
-  { label: 'ابزار دستی',     href: '/category/hand-tools'   },
-  { label: 'جوشکاری',        href: '/category/welding'      },
-  { label: 'ایمنی',          href: '/category/safety'       },
-  { label: 'برندها',         href: '/brands'                },
-  { label: 'وبلاگ',          href: '/blog'                  },
-];
-
 export default function Header() {
-  const [menuOpen,   setMenuOpen]   = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({});
+  const [megaMenuOpen, setMegaMenuOpen] = useState(false);
+
   const { count: cartCount } = useCart();
   const { isAuthenticated, hydrated, openLogin, logout } = useAuth();
+
+  useEffect(() => {
+    let isMounted = true;
+    getCategories().then((data) => {
+      if (isMounted && data.length > 0) {
+        setCategories(data);
+      }
+    }).catch(() => {
+      // Fallback handled inside getCategories
+    });
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const toggleCategoryExpand = (id: string) => {
+    setExpandedCategories((prev) => ({ ...prev, [id]: !prev[id] }));
+  };
 
   return (
     <header className="sticky top-0 z-50 shadow-md">
@@ -43,7 +58,7 @@ export default function Header() {
           <div className="flex items-center gap-4">
             <span>ارسال رایگان برای خرید بالای ۵ میلیون تومان</span>
             <span className="text-gray-500">|</span>
-            <Link href="/track" className="hover:text-white transition-colors">پیگیری سفارش</Link>
+            <Link href="/products" className="hover:text-white transition-colors">پیگیری سفارش</Link>
           </div>
         </div>
       </div>
@@ -122,26 +137,85 @@ export default function Header() {
       </div>
 
       {/* ── Category Nav Bar ────────────────────────────────────────────────── */}
-      <nav className="bg-navy-800 hidden md:block" aria-label="دسته‌بندی محصولات">
+      <nav className="bg-navy-800 hidden md:block relative" aria-label="دسته‌بندی محصولات">
         <div className="container mx-auto px-4">
           <ul className="flex items-center gap-0 overflow-x-auto scrollbar-hide">
             {/* All categories mega menu trigger */}
-            <li>
-              <button className="flex items-center gap-2 text-sm font-medium text-white px-4 py-3 bg-brand hover:bg-brand-700 transition-colors whitespace-nowrap">
+            <li className="relative">
+              <Link
+                href="/products"
+                onMouseEnter={() => setMegaMenuOpen(true)}
+                onMouseLeave={() => setMegaMenuOpen(false)}
+                className="flex items-center gap-2 text-sm font-medium text-white px-4 py-3 bg-brand hover:bg-brand-700 transition-colors whitespace-nowrap"
+              >
                 <Menu className="w-4 h-4" />
                 <span>همه دسته‌بندی‌ها</span>
-              </button>
+              </Link>
+
+              {/* Mega menu dropdown */}
+              {megaMenuOpen && categories.length > 0 && (
+                <div
+                  onMouseEnter={() => setMegaMenuOpen(true)}
+                  onMouseLeave={() => setMegaMenuOpen(false)}
+                  className="absolute start-0 top-full w-72 bg-white text-gray-800 shadow-xl rounded-b-xl border border-gray-100 z-50 py-2 animate-fade-in"
+                >
+                  {categories.map((cat) => (
+                    <div key={cat.id} className="group relative">
+                      <Link
+                        href={`/products?category=${encodeURIComponent(cat.slug)}`}
+                        onClick={() => setMegaMenuOpen(false)}
+                        className="flex items-center justify-between px-4 py-2.5 hover:bg-gray-50 hover:text-brand transition-colors text-sm font-semibold"
+                      >
+                        <span className="flex items-center gap-2">
+                          <span>{cat.icon}</span>
+                          <span>{cat.name}</span>
+                        </span>
+                        {cat.children && cat.children.length > 0 && (
+                          <ChevronDown className="-rotate-90 w-4 h-4 text-gray-400" />
+                        )}
+                      </Link>
+
+                      {/* Subcategories flyout */}
+                      {cat.children && cat.children.length > 0 && (
+                        <div className="hidden group-hover:block absolute start-full top-0 w-64 bg-white text-gray-800 shadow-xl rounded-xl border border-gray-100 z-50 py-2 ms-1">
+                          {cat.children.map((sub) => (
+                            <Link
+                              key={sub.id}
+                              href={`/products?subcategory=${encodeURIComponent(sub.slug)}`}
+                              onClick={() => setMegaMenuOpen(false)}
+                              className="block px-4 py-2 hover:bg-gray-50 hover:text-brand transition-colors text-sm font-medium"
+                            >
+                              {sub.name}
+                            </Link>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
             </li>
-            {NAV_LINKS.map((link) => (
-              <li key={link.href}>
+
+            {/* Dynamic categories from backend API */}
+            {categories.map((cat) => (
+              <li key={cat.id}>
                 <Link
-                  href={link.href}
+                  href={`/products?category=${encodeURIComponent(cat.slug)}`}
                   className="text-sm font-medium text-gray-300 hover:text-white px-4 py-3 block whitespace-nowrap transition-colors hover:bg-white/5"
                 >
-                  {link.label}
+                  {cat.name}
                 </Link>
               </li>
             ))}
+
+            <li>
+              <Link
+                href="/brands"
+                className="text-sm font-medium text-gray-300 hover:text-white px-4 py-3 block whitespace-nowrap transition-colors hover:bg-white/5"
+              >
+                برندها
+              </Link>
+            </li>
           </ul>
         </div>
       </nav>
@@ -185,24 +259,87 @@ export default function Header() {
               </Suspense>
             </div>
 
-            {/* Mobile nav links */}
-            <ul className="py-2">
-              {NAV_LINKS.map((link) => (
-                <li key={link.href}>
-                  <Link
-                    href={link.href}
-                    onClick={() => setMenuOpen(false)}
-                    className="flex items-center justify-between px-4 py-3 text-gray-700 hover:bg-gray-50 hover:text-brand font-medium transition-colors border-b border-gray-50"
-                  >
-                    {link.label}
-                    {/* RTL arrow — points left (back) */}
-                    <ChevronDown className="-rotate-90 w-4 h-4 text-gray-400" />
-                  </Link>
-                </li>
-              ))}
-            </ul>
+            {/* General quick links */}
+            <div className="p-3 border-b bg-gray-50/50">
+              <p className="text-xs font-bold text-gray-400 px-2 mb-2">دسترسی سریع</p>
+              <div className="grid grid-cols-2 gap-2 text-xs font-semibold">
+                <Link
+                  href="/products"
+                  onClick={() => setMenuOpen(false)}
+                  className="flex items-center gap-1.5 p-2 rounded-lg bg-white border border-gray-200 text-gray-700 hover:text-brand"
+                >
+                  <Layers className="w-3.5 h-3.5 text-brand" />
+                  همه محصولات
+                </Link>
+                <Link
+                  href="/brands"
+                  onClick={() => setMenuOpen(false)}
+                  className="flex items-center gap-1.5 p-2 rounded-lg bg-white border border-gray-200 text-gray-700 hover:text-brand"
+                >
+                  <Tag className="w-3.5 h-3.5 text-brand" />
+                  برندها
+                </Link>
+              </div>
+            </div>
 
-            <div className="p-4 mt-2 space-y-2">
+            {/* Mobile category nav links fetched from Backend API */}
+            <div className="py-2">
+              <p className="text-xs font-bold text-gray-400 px-4 py-2">دسته‌بندی‌های محصولات</p>
+              {categories.length === 0 ? (
+                <div className="px-4 py-3 text-sm text-gray-400">در حال دریافت دسته‌بندی‌ها...</div>
+              ) : (
+                <ul className="divide-y divide-gray-100">
+                  {categories.map((cat) => {
+                    const hasChildren = cat.children && cat.children.length > 0;
+                    const isExpanded = !!expandedCategories[cat.id];
+
+                    return (
+                      <li key={cat.id} className="text-sm">
+                        <div className="flex items-center justify-between px-4 py-3 text-gray-800 hover:bg-gray-50 font-semibold">
+                          <Link
+                            href={`/products?category=${encodeURIComponent(cat.slug)}`}
+                            onClick={() => setMenuOpen(false)}
+                            className="flex items-center gap-2.5 flex-1 hover:text-brand transition-colors"
+                          >
+                            <span className="text-base">{cat.icon}</span>
+                            <span>{cat.name}</span>
+                          </Link>
+                          {hasChildren && (
+                            <button
+                              type="button"
+                              onClick={() => toggleCategoryExpand(cat.id)}
+                              className="p-1 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+                              aria-label={`نمایش زیردسته‌بندی‌های ${cat.name}`}
+                            >
+                              {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                            </button>
+                          )}
+                        </div>
+
+                        {/* Collapsible Subcategories */}
+                        {hasChildren && isExpanded && (
+                          <ul className="bg-gray-50 border-t border-gray-100 py-1 ps-8 pe-4 space-y-1">
+                            {cat.children?.map((sub) => (
+                              <li key={sub.id}>
+                                <Link
+                                  href={`/products?subcategory=${encodeURIComponent(sub.slug)}`}
+                                  onClick={() => setMenuOpen(false)}
+                                  className="block py-2 text-xs font-medium text-gray-600 hover:text-brand transition-colors"
+                                >
+                                  {sub.name}
+                                </Link>
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
+            </div>
+
+            <div className="p-4 mt-2 space-y-2 border-t">
               {hydrated && isAuthenticated ? (
                 <>
                   <Link href="/dashboard" onClick={() => setMenuOpen(false)} className="btn-outline w-full flex items-center justify-center gap-2">
@@ -214,7 +351,7 @@ export default function Header() {
                   <button
                     type="button"
                     onClick={() => { setMenuOpen(false); void logout(); }}
-                    className="w-full text-sm text-red-600 py-2.5"
+                    className="w-full text-sm text-red-600 py-2.5 font-medium"
                   >
                     خروج
                   </button>
@@ -238,3 +375,4 @@ export default function Header() {
     </header>
   );
 }
+

@@ -31,7 +31,7 @@ export default function CategoryStrip({ categories }: Props) {
           {items.map((cat) => (
             <Link
               key={cat.id}
-              href={`/category/${cat.slug}`}
+              href={`/products?category=${encodeURIComponent(cat.slug)}`}
               role="listitem"
               className={`
                 flex-shrink-0 flex items-center gap-2 px-4 py-2 rounded-full border text-sm font-semibold
@@ -50,7 +50,7 @@ export default function CategoryStrip({ categories }: Props) {
 
           {/* View all — always last (leftmost in RTL) */}
           <Link
-            href="/categories"
+            href="/products"
             className="flex-shrink-0 px-4 py-2 rounded-full border border-gray-300 bg-gray-50 text-gray-600 text-sm font-semibold whitespace-nowrap hover:bg-gray-100 transition-colors"
           >
             همه دسته‌بندی‌ها →

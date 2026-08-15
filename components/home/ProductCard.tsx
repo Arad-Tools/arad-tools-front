@@ -1,7 +1,11 @@
+'use client';
+
 import Link from 'next/link';
 import Image from 'next/image';
-import { Star, ShoppingCart, Package } from 'lucide-react';
+import { Star, ShoppingCart, Package, Check } from 'lucide-react';
+import { useState } from 'react';
 import type { Product } from '@/lib/types';
+import { useCart } from '@/lib/stores/cart-context';
 import {
   formatToman, renderBadgeLabel, calcDiscount, toPersianDigits, cn, productImage,
 } from '@/lib/utils';
@@ -14,6 +18,20 @@ interface Props {
 export default function ProductCard({ product, priority = false }: Props) {
   const { label, className: badgeClass } = renderBadgeLabel(product.badge ?? '');
   const discount = calcDiscount(product.price, product.oldPrice);
+  const { addItem } = useCart();
+  const [added, setAdded] = useState(false);
+
+  const handleAddToCart = () => {
+    addItem({
+      productId: product.id,
+      slug: product.slug,
+      title: product.title,
+      image: product.image,
+      price: product.price,
+    });
+    setAdded(true);
+    setTimeout(() => setAdded(false), 1500);
+  };
 
   return (
     <article className="product-card group relative bg-white rounded-2xl border border-gray-100 shadow-product hover:shadow-product-hover transition-all duration-300 hover:-translate-y-1 overflow-hidden flex flex-col">
@@ -110,17 +128,30 @@ export default function ProductCard({ product, priority = false }: Props) {
 
         {/* Add to cart button */}
         <button
+          type="button"
+          onClick={handleAddToCart}
           disabled={product.inStock === false}
           aria-label={`افزودن ${product.title} به سبد خرید`}
           className={cn(
             'mt-2 w-full flex items-center justify-center gap-2 py-2 rounded-xl text-sm font-semibold transition-all duration-200',
             product.inStock === false
               ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-              : 'bg-brand/10 text-brand hover:bg-brand hover:text-white active:scale-95 focus-visible:ring-2 focus-visible:ring-brand/50 focus-visible:outline-none',
+              : added
+                ? 'bg-emerald-600 text-white'
+                : 'bg-brand/10 text-brand hover:bg-brand hover:text-white active:scale-95 focus-visible:ring-2 focus-visible:ring-brand/50 focus-visible:outline-none',
           )}
         >
-          <ShoppingCart className="w-4 h-4" />
-          {product.inStock === false ? 'ناموجود' : 'افزودن به سبد'}
+          {added ? (
+            <>
+              <Check className="w-4 h-4" />
+              اضافه شد
+            </>
+          ) : (
+            <>
+              <ShoppingCart className="w-4 h-4" />
+              {product.inStock === false ? 'ناموجود' : 'افزودن به سبد'}
+            </>
+          )}
         </button>
       </div>
     </article>

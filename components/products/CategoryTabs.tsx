@@ -42,7 +42,7 @@ export default function CategoryTabs({
             return (
               <Link
                 key={cat.id}
-                href={`/category/${cat.slug}`}
+                href={`/products?category=${encodeURIComponent(cat.slug)}`}
                 className={cn(
                   'flex-shrink-0 inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-semibold border transition-all',
                   active
@@ -57,7 +57,7 @@ export default function CategoryTabs({
           })}
 
           <Link
-            href="/categories"
+            href="/products"
             className="flex-shrink-0 text-sm font-semibold text-brand hover:text-brand-700 px-2 whitespace-nowrap"
           >
             همه دسته‌بندی‌ها →

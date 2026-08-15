@@ -7,12 +7,12 @@ import {
 
 const FOOTER_LINKS = {
   shop: [
-    { label: 'ابزار برقی',      href: '/category/power-tools'  },
-    { label: 'ابزار دستی',      href: '/category/hand-tools'   },
-    { label: 'جوشکاری',         href: '/category/welding'      },
-    { label: 'اندازه‌گیری',     href: '/category/measuring'    },
-    { label: 'تجهیزات ایمنی',  href: '/category/safety'       },
-    { label: 'تازه‌واردها',     href: '/products/new'          },
+    { label: 'ابزار برقی',      href: '/products?category=power-tools'  },
+    { label: 'ابزار دستی',      href: '/products?category=hand-tools'   },
+    { label: 'جوشکاری',         href: '/products?category=welding'      },
+    { label: 'اندازه‌گیری',     href: '/products?category=measuring'    },
+    { label: 'تجهیزات ایمنی',  href: '/products?category=safety'       },
+    { label: 'تازه‌واردها',     href: '/products/new'                   },
   ],
   brands: [
     { label: 'بوش',             href: '/brand/bosch'           },
