@@ -34,6 +34,7 @@ export default function ProductReviews({
   const [userRating, setUserRating] = useState(5);
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState('');
+  const [authorError, setAuthorError] = useState('');
 
   const sorted = [...reviews].sort((a, b) => {
     switch (sort) {
@@ -45,8 +46,12 @@ export default function ProductReviews({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!authorName.trim()) return;
+    if (!authorName.trim()) {
+      setAuthorError('لطفاً نام خود را وارد کنید.');
+      return;
+    }
 
+    setAuthorError('');
     setSubmitting(true);
     setMessage('');
 
@@ -131,14 +136,27 @@ export default function ProductReviews({
             </button>
           ))}
         </div>
-        <input
-          type="text"
-          value={authorName}
-          onChange={(e) => setAuthorName(e.target.value)}
-          placeholder="نام شما"
-          className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand/30"
-          required
-        />
+        <div>
+          <input
+            type="text"
+            value={authorName}
+            onChange={(e) => {
+              setAuthorName(e.target.value);
+              if (authorError) setAuthorError('');
+            }}
+            placeholder="نام شما *"
+            className={cn(
+              'w-full px-4 py-2.5 rounded-xl border text-sm focus:outline-none transition-colors',
+              authorError
+                ? '!border-red-500 !ring-2 !ring-red-500 bg-red-50/40 text-red-900 placeholder:text-red-400'
+                : 'border-gray-200 focus:ring-2 focus:ring-brand/30',
+            )}
+            required
+          />
+          {authorError && (
+            <p className="mt-1 text-xs text-red-600 font-medium">{authorError}</p>
+          )}
+        </div>
         <textarea
           value={body}
           onChange={(e) => setBody(e.target.value)}

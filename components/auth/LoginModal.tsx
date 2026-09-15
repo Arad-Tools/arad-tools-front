@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState, type KeyboardEvent } from 'react';
 import { X, Loader2 } from 'lucide-react';
 import { useAuth } from '@/lib/stores/auth-context';
-import { toPersianDigits } from '@/lib/utils';
+import { cn, toPersianDigits } from '@/lib/utils';
 
 type Step = 'mobile' | 'otp' | 'profile';
 
@@ -27,6 +27,11 @@ export default function LoginModal() {
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [fieldErrors, setFieldErrors] = useState<{
+    mobile?: string;
+    otp?: boolean;
+    name?: string;
+  }>({});
   const [resendIn, setResendIn] = useState(0);
   const [debugCode, setDebugCode] = useState<string | null>(null);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
@@ -38,6 +43,7 @@ export default function LoginModal() {
     setName('');
     setEmail('');
     setError('');
+    setFieldErrors({});
     setResendIn(0);
     setDebugCode(null);
   }, []);
@@ -72,6 +78,12 @@ export default function LoginModal() {
 
   const handleSendOtp = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!/^09\d{9}$/.test(mobile)) {
+      setFieldErrors((prev) => ({ ...prev, mobile: 'شماره موبایل باید ۱۱ رقم و با ۰۹ شروع شود.' }));
+      return;
+    }
+
+    setFieldErrors((prev) => ({ ...prev, mobile: undefined }));
     setError('');
     setLoading(true);
 
@@ -89,9 +101,11 @@ export default function LoginModal() {
 
   const handleVerifyOtp = async (code: string) => {
     if (code.length !== OTP_LENGTH) {
+      setFieldErrors((prev) => ({ ...prev, otp: true }));
       return;
     }
 
+    setFieldErrors((prev) => ({ ...prev, otp: false }));
     setError('');
     setLoading(true);
 
@@ -102,6 +116,7 @@ export default function LoginModal() {
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'کد تأیید نامعتبر است.');
+      setFieldErrors((prev) => ({ ...prev, otp: true }));
       setOtp(Array(OTP_LENGTH).fill(''));
       inputRefs.current[0]?.focus();
     } finally {
@@ -110,6 +125,7 @@ export default function LoginModal() {
   };
 
   const handleOtpChange = (index: number, value: string) => {
+    setFieldErrors((prev) => ({ ...prev, otp: false }));
     const digit = value.replace(/\D/g, '').slice(-1);
     const next = [...otp];
     next[index] = digit;
@@ -132,11 +148,17 @@ export default function LoginModal() {
 
   const handleProfileSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!name.trim()) {
+      setFieldErrors((prev) => ({ ...prev, name: 'وارد کردن نام و نام خانوادگی الزامی است.' }));
+      return;
+    }
+
+    setFieldErrors((prev) => ({ ...prev, name: undefined }));
     setError('');
     setLoading(true);
 
     try {
-      await saveProfile({ name, email: email || undefined });
+      await saveProfile({ name: name.trim(), email: email ? email.trim() : undefined });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'خطایی رخ داد.');
     } finally {
@@ -211,7 +233,7 @@ export default function LoginModal() {
               <form onSubmit={handleSendOtp} className="space-y-4">
                 <div>
                   <label htmlFor="login-mobile" className="block text-sm font-medium text-gray-700 mb-1.5">
-                    شماره موبایل
+                    شماره موبایل <span className="text-red-500">*</span>
                   </label>
                   <input
                     id="login-mobile"
@@ -220,15 +242,28 @@ export default function LoginModal() {
                     inputMode="numeric"
                     placeholder="09123456789"
                     value={mobile}
-                    onChange={(e) => setMobile(e.target.value.replace(/\D/g, '').slice(0, 11))}
-                    className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand/50 text-left"
+                    onChange={(e) => {
+                      setMobile(e.target.value.replace(/\D/g, '').slice(0, 11));
+                      if (fieldErrors.mobile) {
+                        setFieldErrors((prev) => ({ ...prev, mobile: undefined }));
+                      }
+                    }}
+                    className={cn(
+                      'w-full border rounded-xl px-4 py-3 text-sm focus:outline-none text-left transition-colors',
+                      fieldErrors.mobile
+                        ? '!border-red-500 !ring-2 !ring-red-500 bg-red-50/40 text-red-900 placeholder:text-red-400'
+                        : 'border-gray-200 focus:ring-2 focus:ring-brand/50',
+                    )}
                     required
                     pattern="09[0-9]{9}"
                   />
+                  {fieldErrors.mobile && (
+                    <p className="mt-1 text-xs text-red-600 font-medium">{fieldErrors.mobile}</p>
+                  )}
                 </div>
                 <button
                   type="submit"
-                  disabled={loading || mobile.length !== 11}
+                  disabled={loading}
                   className="btn-primary w-full flex items-center justify-center gap-2 disabled:opacity-60"
                 >
                   {loading && <Loader2 className="w-4 h-4 animate-spin" />}
@@ -250,11 +285,22 @@ export default function LoginModal() {
                       value={digit}
                       onChange={(e) => handleOtpChange(i, e.target.value)}
                       onKeyDown={(e) => handleOtpKeyDown(i, e)}
-                      className="w-11 h-12 text-center text-lg font-bold border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand/50"
+                      className={cn(
+                        'w-11 h-12 text-center text-lg font-bold border rounded-xl focus:outline-none transition-colors',
+                        fieldErrors.otp
+                          ? '!border-red-500 !ring-2 !ring-red-500 bg-red-50/40 text-red-900'
+                          : 'border-gray-200 focus:ring-2 focus:ring-brand/50',
+                      )}
                       aria-label={`رقم ${toPersianDigits(String(i + 1))}`}
                     />
                   ))}
                 </div>
+
+                {fieldErrors.otp && (
+                  <p className="text-xs text-red-600 font-medium text-center">
+                    لطفاً تمام ۶ رقم کد تأیید را وارد کنید.
+                  </p>
+                )}
 
                 {debugCode && (
                   <p className="text-xs text-amber-700 bg-amber-50 border border-amber-100 rounded-lg px-3 py-2 text-center">
@@ -296,16 +342,29 @@ export default function LoginModal() {
               <form onSubmit={handleProfileSubmit} className="space-y-4">
                 <div>
                   <label htmlFor="profile-name" className="block text-sm font-medium text-gray-700 mb-1.5">
-                    نام و نام خانوادگی
+                    نام و نام خانوادگی <span className="text-red-500">*</span>
                   </label>
                   <input
                     id="profile-name"
                     type="text"
                     value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand/50"
+                    onChange={(e) => {
+                      setName(e.target.value);
+                      if (fieldErrors.name) {
+                        setFieldErrors((prev) => ({ ...prev, name: undefined }));
+                      }
+                    }}
+                    className={cn(
+                      'w-full border rounded-xl px-4 py-3 text-sm focus:outline-none transition-colors',
+                      fieldErrors.name
+                        ? '!border-red-500 !ring-2 !ring-red-500 bg-red-50/40 text-red-900'
+                        : 'border-gray-200 focus:ring-2 focus:ring-brand/50',
+                    )}
                     required
                   />
+                  {fieldErrors.name && (
+                    <p className="mt-1 text-xs text-red-600 font-medium">{fieldErrors.name}</p>
+                  )}
                 </div>
                 <div>
                   <label htmlFor="profile-email" className="block text-sm font-medium text-gray-700 mb-1.5">

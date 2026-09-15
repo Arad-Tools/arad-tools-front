@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { Bell, CheckCircle2 } from 'lucide-react';
 import { notifyStockAvailable } from '@/lib/api';
-import { toPersianDigits } from '@/lib/utils';
+import { cn, toPersianDigits } from '@/lib/utils';
 
 export default function StockNotifyForm({ slug }: { slug: string }) {
   const [mobile, setMobile] = useState('');
@@ -46,10 +46,18 @@ export default function StockNotifyForm({ slug }: { slug: string }) {
         <input
           type="tel"
           value={mobile}
-          onChange={(e) => setMobile(e.target.value)}
+          onChange={(e) => {
+            setMobile(e.target.value);
+            if (error) setError('');
+          }}
           placeholder="۰۹۱۲۱۲۳۴۵۶۷"
           dir="ltr"
-          className="flex-1 px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-brand/30 text-sm"
+          className={cn(
+            'flex-1 px-4 py-3 rounded-xl border text-sm focus:outline-none transition-colors',
+            error
+              ? '!border-red-500 !ring-2 !ring-red-500 bg-red-50/40 text-red-900 placeholder:text-red-400'
+              : 'border-gray-200 focus:ring-2 focus:ring-brand/30',
+          )}
           aria-label="شماره موبایل"
         />
         <button
