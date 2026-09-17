@@ -7,7 +7,17 @@ const remotePatterns: NonNullable<NextConfig["images"]>["remotePatterns"] = [
     pathname: "/**",
   },
   {
+    protocol: "http",
+    hostname: "api.aradtoolsco.ir",
+    pathname: "/**",
+  },
+  {
     protocol: "https",
+    hostname: "*.aradtoolsco.ir",
+    pathname: "/**",
+  },
+  {
+    protocol: "http",
     hostname: "*.aradtoolsco.ir",
     pathname: "/**",
   },
@@ -59,7 +69,7 @@ if (apiUrl) {
         protocol,
         hostname: parsed.hostname,
         ...(port ? { port } : {}),
-        pathname: "/storage/**",
+        pathname: "/**",
       });
     }
   } catch {
