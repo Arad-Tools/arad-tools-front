@@ -5,8 +5,10 @@ services:
       - "3000:3000"
     restart: unless-stopped
     environment:
-      # Use the backend service name as the host inside the Docker network
-      NEXT_PUBLIC_API_URL: http://backend:8000/api
+      # Public URL for the frontend / browser and asset resolution
+      NEXT_PUBLIC_API_URL: https://api.aradtoolsco.ir/api
+      # Internal Docker service URL for server-side SSR fetches
+      INTERNAL_API_URL: http://backend:8000/api
     networks:
       - shared-network
 

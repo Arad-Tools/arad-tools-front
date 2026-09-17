@@ -9,6 +9,7 @@ import { useCart } from '@/lib/stores/cart-context';
 import {
   formatToman, renderBadgeLabel, calcDiscount, toPersianDigits, cn, productImage,
 } from '@/lib/utils';
+import { PRODUCT_PLACEHOLDER } from '@/lib/media';
 
 interface Props {
   product: Product;
@@ -20,6 +21,7 @@ export default function ProductCard({ product, priority = false }: Props) {
   const discount = calcDiscount(product.price, product.oldPrice);
   const { addItem } = useCart();
   const [added, setAdded] = useState(false);
+  const [imgSrc, setImgSrc] = useState(() => productImage(product.image));
 
   const handleAddToCart = () => {
     addItem({
@@ -39,12 +41,13 @@ export default function ProductCard({ product, priority = false }: Props) {
       {/* ── Image ─────────────────────────────────────────────────────────── */}
       <Link href={`/product/${product.slug}`} className="block overflow-hidden bg-gray-50 aspect-square relative" tabIndex={-1} aria-hidden>
         <Image
-          src={productImage(product.image)}
+          src={imgSrc}
           alt={product.title}
           fill
           sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
           className="product-img object-contain p-4 transition-transform duration-400"
           priority={priority}
+          onError={() => setImgSrc(PRODUCT_PLACEHOLDER)}
         />
       </Link>
 

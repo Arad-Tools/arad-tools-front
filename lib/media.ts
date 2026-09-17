@@ -7,23 +7,31 @@ import type {
   Video,
 } from './types';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? '';
+const DEFAULT_PUBLIC_ORIGIN = 'https://api.aradtoolsco.ir';
 
 /** Site origin derived from NEXT_PUBLIC_API_URL (strips trailing /api). */
 export function getApiOrigin(): string {
-  if (!API_BASE) {
-    return '';
+  // If running in browser on production domain
+  if (typeof window !== 'undefined' && window.location.hostname.includes('aradtoolsco.ir')) {
+    return DEFAULT_PUBLIC_ORIGIN;
+  }
+
+  const base = process.env.NEXT_PUBLIC_API_URL?.trim();
+
+  // If unset, or pointing to Docker internal network name or closed VPS raw IP
+  if (!base || base.includes('backend:8000') || base.includes('62.60.198.143')) {
+    return DEFAULT_PUBLIC_ORIGIN;
   }
 
   try {
-    const url = new URL(API_BASE);
+    const url = new URL(base);
     url.pathname = url.pathname.replace(/\/api\/?$/, '');
 
     const path = url.pathname.replace(/\/$/, '');
 
     return `${url.origin}${path === '' || path === '/' ? '' : path}`;
   } catch {
-    return '';
+    return DEFAULT_PUBLIC_ORIGIN;
   }
 }
 
@@ -39,7 +47,22 @@ export function resolveMediaUrl(src?: string | null): string | undefined {
     return undefined;
   }
 
-  const trimmed = src.trim();
+  let trimmed = src.trim();
+
+  // If the URL contains an internal Docker host, closed raw IP, or localhost in production,
+  // extract the pathname to rebase onto the reachable public API origin.
+  const isInternalOrDeadHost =
+    /^https?:\/\/(?:62\.60\.198\.143|backend)(?::\d+)?(\/.*)?$/i.test(trimmed) ||
+    (process.env.NODE_ENV === 'production' && /^https?:\/\/(?:localhost|127\.0\.0\.1)(?::\d+)?(\/.*)?$/i.test(trimmed));
+
+  if (isInternalOrDeadHost) {
+    try {
+      const parsed = new URL(trimmed);
+      trimmed = parsed.pathname + parsed.search;
+    } catch {
+      // ignore
+    }
+  }
 
   if (/^https?:\/\//i.test(trimmed)) {
     return trimmed;

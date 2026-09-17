@@ -32,6 +32,8 @@ jobs:
           context: .
           push: true
           tags: ghcr.io/arad-tools/arad-tools-front:latest
+          build-args: |
+            NEXT_PUBLIC_API_URL=https://api.aradtoolsco.ir/api
 
   deploy:
     needs: build-and-push

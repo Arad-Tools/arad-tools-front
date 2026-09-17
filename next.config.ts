@@ -3,6 +3,16 @@ import type { NextConfig } from "next";
 const remotePatterns: NonNullable<NextConfig["images"]>["remotePatterns"] = [
   {
     protocol: "https",
+    hostname: "api.aradtoolsco.ir",
+    pathname: "/**",
+  },
+  {
+    protocol: "https",
+    hostname: "*.aradtoolsco.ir",
+    pathname: "/**",
+  },
+  {
+    protocol: "https",
     hostname: "www.aparat.com",
     pathname: "/video/video/thumb/**",
   },
@@ -15,7 +25,19 @@ const remotePatterns: NonNullable<NextConfig["images"]>["remotePatterns"] = [
     protocol: "http",
     hostname: "localhost",
     port: "8000",
-    pathname: "/storage/**",
+    pathname: "/**",
+  },
+  {
+    protocol: "http",
+    hostname: "127.0.0.1",
+    port: "8000",
+    pathname: "/**",
+  },
+  {
+    protocol: "http",
+    hostname: "62.60.198.143",
+    port: "8000",
+    pathname: "/**",
   },
 ];
 
