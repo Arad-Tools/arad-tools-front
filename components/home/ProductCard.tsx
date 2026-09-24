@@ -36,7 +36,7 @@ export default function ProductCard({ product, priority = false }: Props) {
   };
 
   return (
-    <article className="product-card group relative bg-white rounded-2xl border border-gray-100 shadow-product hover:shadow-product-hover transition-all duration-300 hover:-translate-y-1 overflow-hidden flex flex-col">
+    <article className="product-card group relative bg-white rounded-2xl border border-gray-100 shadow-product hover:shadow-product-hover transition-all duration-300 hover:-translate-y-1 overflow-hidden flex flex-col h-full">
 
       {/* ── Image ─────────────────────────────────────────────────────────── */}
       <Link href={`/product/${product.slug}`} className="block overflow-hidden bg-gray-50 aspect-square relative" tabIndex={-1} aria-hidden>
@@ -80,7 +80,7 @@ export default function ProductCard({ product, priority = false }: Props) {
 
         {/* Title */}
         <Link href={`/product/${product.slug}`} className="group/title">
-          <h3 className="text-sm font-semibold text-gray-800 leading-relaxed line-clamp-2 group-hover/title:text-brand transition-colors">
+          <h3 className="text-sm font-semibold text-gray-800 leading-relaxed line-clamp-2 min-h-[2.5rem] group-hover/title:text-brand transition-colors">
             {product.title}
           </h3>
         </Link>
@@ -105,15 +105,21 @@ export default function ProductCard({ product, priority = false }: Props) {
           </span>
         </div>
 
-        {/* Price block */}
+        {/* Price block — uniform height whether discounted or not */}
         <div className="flex items-end justify-between mt-1">
           <div>
-            {/* Old price — strikethrough */}
-            {product.oldPrice && product.oldPrice > product.price && (
-              <p className="text-xs text-gray-400 line-through mb-0.5">
-                {formatToman(product.oldPrice)}
-              </p>
-            )}
+            {/* Old price slot — fixed height prevents layout shifts between cards */}
+            <div className="h-4 flex items-center mb-0.5" aria-hidden={!(product.oldPrice && product.oldPrice > product.price)}>
+              {product.oldPrice && product.oldPrice > product.price ? (
+                <p className="text-xs text-gray-400 line-through">
+                  {formatToman(product.oldPrice)}
+                </p>
+              ) : (
+                <span className="invisible text-xs select-none">
+                  -
+                </span>
+              )}
+            </div>
             {/* Current price */}
             <p className="text-base font-black text-gray-900 leading-none">
               {formatToman(product.price)}

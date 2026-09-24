@@ -26,7 +26,7 @@ const FOOTER_LINKS = {
     { label: 'درباره ما',       href: '/about'                 },
     { label: 'تماس با ما',      href: '/contact'               },
     { label: 'وبلاگ',           href: '/blog'                  },
-    { label: 'پیگیری سفارش',   href: '/track'                 },
+    { label: 'پیگیری سفارش',   href: '/contact?tab=track'     },
     { label: 'قوانین و مقررات', href: '/terms'                 },
     { label: 'حریم خصوصی',     href: '/privacy'               },
   ],

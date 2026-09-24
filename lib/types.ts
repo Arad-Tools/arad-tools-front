@@ -251,3 +251,42 @@ export interface AuthResponse {
   message?: string;
 }
 
+// ─── Contact & Order Tracking ─────────────────────────────────────────────────
+
+export interface ContactInquiryPayload {
+  name: string;
+  phone: string;
+  order_code?: string;
+  subject?: string;
+  message: string;
+}
+
+export interface ContactInquiryResponse {
+  success: boolean;
+  message: string;
+  data?: {
+    tracking_code: string;
+    name: string;
+    order_code: string | null;
+    status: string;
+    status_label: string;
+    created_at: string;
+  };
+}
+
+export interface TrackOrderResponse {
+  found: boolean;
+  message?: string;
+  data?: {
+    tracking_code: string;
+    order_code: string | null;
+    name?: string;
+    status: string;
+    status_label: string;
+    subject: string;
+    created_at: string;
+    updated_at: string;
+  };
+}
+
+

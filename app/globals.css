@@ -80,6 +80,24 @@
     direction: rtl;
     text-align: right;
   }
+
+  button,
+  [role="button"],
+  a,
+  input[type="button"],
+  input[type="submit"],
+  input[type="reset"],
+  select,
+  summary {
+    cursor: pointer;
+  }
+
+  button:disabled,
+  [role="button"][aria-disabled="true"],
+  input:disabled,
+  select:disabled {
+    cursor: not-allowed;
+  }
 }
 
 /* ─── Utilities ───────────────────────────────────────────────────────────── */

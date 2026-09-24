@@ -58,7 +58,7 @@ export default function Header() {
           <div className="flex items-center gap-4">
             <span>ارسال رایگان برای خرید بالای ۵ میلیون تومان</span>
             <span className="text-gray-500">|</span>
-            <Link href="/products" className="hover:text-white transition-colors">پیگیری سفارش</Link>
+            <Link href="/contact?tab=track" className="hover:text-white transition-colors">پیگیری سفارش</Link>
           </div>
         </div>
       </div>
@@ -216,6 +216,15 @@ export default function Header() {
                 برندها
               </Link>
             </li>
+
+            <li>
+              <Link
+                href="/contact"
+                className="text-sm font-medium text-gray-300 hover:text-white px-4 py-3 block whitespace-nowrap transition-colors hover:bg-white/5"
+              >
+                تماس با ما
+              </Link>
+            </li>
           </ul>
         </div>
       </nav>
@@ -337,6 +346,23 @@ export default function Header() {
                   })}
                 </ul>
               )}
+            </div>
+
+            <div className="px-4 py-3 border-t border-gray-100 flex flex-col gap-2">
+              <Link
+                href="/contact?tab=track"
+                onClick={() => setMenuOpen(false)}
+                className="text-sm font-semibold text-gray-700 hover:text-brand py-1.5 transition-colors"
+              >
+                پیگیری سفارش
+              </Link>
+              <Link
+                href="/contact"
+                onClick={() => setMenuOpen(false)}
+                className="text-sm font-semibold text-gray-700 hover:text-brand py-1.5 transition-colors"
+              >
+                تماس با ما
+              </Link>
             </div>
 
             <div className="p-4 mt-2 space-y-2 border-t">

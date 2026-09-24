@@ -2,6 +2,7 @@ import type {
   Product, Video, BlogPost, Brand, Category, HeroBannerItem,
   ProductFilters, ProductFilterMeta, PaginatedProducts,
   ProductDetail, ProductReview,
+  ContactInquiryPayload, ContactInquiryResponse, TrackOrderResponse,
 } from './types';
 import { buildFilterQueryString } from './product-filters';
 import {
@@ -274,8 +275,12 @@ export async function getProduct(slug: string): Promise<ProductDetail | null> {
     if (res.status === 404) return null;
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
-    const json = await res.json() as ProductDetail;
-    return normalizeProductDetail(json);
+    const json: unknown = await res.json();
+    const data = json && typeof json === 'object' && 'data' in json
+      ? (json as { data: ProductDetail }).data
+      : (json as ProductDetail);
+
+    return data && data.slug ? normalizeProductDetail(data) : null;
   } catch (err) {
     console.warn(`[API] /products/${slug} failed:`, err);
     return null;
@@ -335,3 +340,66 @@ export async function getProductsBySlugs(slugs: string[]): Promise<Product[]> {
 
   return results;
 }
+
+// ─── Contact & Order Tracking ─────────────────────────────────────────────────
+
+/** Submit contact inquiry or order tracking message */
+export async function submitContactInquiry(
+  data: ContactInquiryPayload,
+): Promise<ContactInquiryResponse> {
+  const apiBase = getApiBaseUrl();
+
+  try {
+    const res = await fetch(`${apiBase}/contact`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+      body: JSON.stringify(data),
+    });
+
+    const json = await res.json() as ContactInquiryResponse;
+
+    if (!res.ok) {
+      return {
+        success: false,
+        message: (json as { message?: string })?.message || 'خطا در ثبت درخواست. لطفاً دوباره تلاش کنید.',
+      };
+    }
+
+    return json;
+  } catch (err) {
+    console.warn('[API] /contact submission failed:', err);
+    return {
+      success: false,
+      message: 'برقراری ارتباط با سرور برقرار نشد. لطفاً اینترنت خود را بررسی نمایید.',
+    };
+  }
+}
+
+/** Track an order or support inquiry by tracking/order code */
+export async function trackOrderInquiry(
+  code: string,
+  phone?: string,
+): Promise<TrackOrderResponse> {
+  const apiBase = getApiBaseUrl();
+  const params = new URLSearchParams({ code: code.trim() });
+  if (phone?.trim()) {
+    params.set('phone', phone.trim());
+  }
+
+  try {
+    const res = await fetch(`${apiBase}/contact/track?${params.toString()}`, {
+      cache: 'no-store',
+      headers: { Accept: 'application/json' },
+    });
+
+    const json = await res.json() as TrackOrderResponse;
+    return json;
+  } catch (err) {
+    console.warn('[API] /contact/track failed:', err);
+    return {
+      found: false,
+      message: 'خطا در دریافت وضعیت سفارش. لطفاً اتصال اینترنت خود را بررسی کنید.',
+    };
+  }
+}
+
