@@ -1,9 +1,14 @@
 import type {
   BlogPost,
   Brand,
+  BreadcrumbItem,
   HeroBannerItem,
+  LabeledSpecification,
   Product,
   ProductDetail,
+  ProductFAQ,
+  ProductReview,
+  QuantityDiscount,
   Video,
 } from './types';
 
@@ -101,16 +106,111 @@ export function normalizeProduct(product: Product): Product {
   };
 }
 
+function parseJsonArray<T>(input: unknown): T[] {
+  if (Array.isArray(input)) {
+    return input as T[];
+  }
+  if (typeof input === 'string') {
+    const trimmed = input.trim();
+    if (!trimmed || trimmed === '[]') return [];
+    try {
+      let parsed: unknown = JSON.parse(trimmed);
+      while (typeof parsed === 'string') {
+        parsed = JSON.parse(parsed);
+      }
+      if (Array.isArray(parsed)) {
+        return parsed as T[];
+      }
+    } catch {
+      return [];
+    }
+  }
+  return [];
+}
+
+function parseKeyFeatures(input: unknown): string[] {
+  const arr = parseJsonArray<unknown>(input);
+  if (arr.length > 0) {
+    return arr
+      .map((item) => (typeof item === 'string' ? item.trim() : String(item ?? '').trim()))
+      .filter((item) => item.length > 0);
+  }
+  if (typeof input === 'string') {
+    const trimmed = input.trim();
+    if (trimmed && !trimmed.startsWith('[') && !trimmed.startsWith('{')) {
+      return trimmed.split(/[\r\n]+/).map((s) => s.trim()).filter(Boolean);
+    }
+  }
+  return [];
+}
+
+function parseFaqs(input: unknown): ProductFAQ[] {
+  const arr = parseJsonArray<unknown>(input);
+  return arr
+    .filter((f): f is Record<string, unknown> => Boolean(f && typeof f === 'object'))
+    .map((f) => ({
+      question: String(f.question ?? '').trim(),
+      answer: String(f.answer ?? '').trim(),
+    }))
+    .filter((f) => f.question.length > 0);
+}
+
+function parseQuantityDiscounts(input: unknown): QuantityDiscount[] {
+  const arr = parseJsonArray<Record<string, unknown>>(input);
+  return arr
+    .map((tier) => ({
+      minQuantity: Number(tier?.minQuantity ?? tier?.min_quantity ?? 0),
+      discountPercent: Number(tier?.discountPercent ?? tier?.discount_percent ?? 0),
+    }))
+    .filter((tier) => tier.minQuantity > 0 && tier.discountPercent > 0);
+}
+
+function parseBreadcrumbs(input: unknown): BreadcrumbItem[] {
+  const arr = parseJsonArray<Record<string, unknown>>(input);
+  return arr
+    .filter((item): item is Record<string, unknown> => Boolean(item && typeof item === 'object'))
+    .map((item) => ({
+      label: String(item.label ?? '').trim(),
+      href: String(item.href ?? '#').trim(),
+    }))
+    .filter((item) => item.label.length > 0);
+}
+
+function parseLabeledSpecs(input: unknown): LabeledSpecification[] {
+  const arr = parseJsonArray<Record<string, unknown>>(input);
+  return arr
+    .filter((s): s is Record<string, unknown> => Boolean(s && typeof s === 'object'))
+    .map((s) => ({
+      key: String(s.key ?? '').trim(),
+      label: String(s.label ?? s.key ?? '').trim(),
+      value: String(s.value ?? '').trim(),
+    }))
+    .filter((s) => s.label.length > 0 && s.value.length > 0);
+}
+
 export function normalizeProductDetail(detail: ProductDetail): ProductDetail {
-  const images = resolveMediaUrls(detail.images);
-  const primary = resolveMediaUrl(detail.image) ?? images[0];
+  const rawImages = parseJsonArray<string>(detail.images);
+  const images = resolveMediaUrls(rawImages);
+  const primary = resolveMediaUrl(detail.image) ?? images[0] ?? PRODUCT_PLACEHOLDER;
+  const safeImages = images.length > 0 ? images : [primary];
+
+  const rawRelated = parseJsonArray<Product>(detail.relatedProducts);
+  const rawVideos = parseJsonArray<Video>(detail.videos);
+  const rawReviews = parseJsonArray<ProductReview>(detail.reviews);
 
   return {
     ...detail,
-    image: primary ?? PRODUCT_PLACEHOLDER,
-    images: images.length > 0 ? images : primary ? [primary] : [],
-    relatedProducts: detail.relatedProducts?.map(normalizeProduct) ?? [],
-    videos: detail.videos?.map(normalizeVideo),
+    id: String(detail.id),
+    image: primary,
+    images: safeImages,
+    keyFeatures: parseKeyFeatures(detail.keyFeatures),
+    faqs: parseFaqs(detail.faqs),
+    quantityDiscounts: parseQuantityDiscounts(detail.quantityDiscounts),
+    breadcrumbs: parseBreadcrumbs(detail.breadcrumbs),
+    labeledSpecifications: parseLabeledSpecs(detail.labeledSpecifications),
+    relatedProducts: rawRelated.map(normalizeProduct),
+    videos: rawVideos.map(normalizeVideo),
+    reviews: rawReviews,
   };
 }
 

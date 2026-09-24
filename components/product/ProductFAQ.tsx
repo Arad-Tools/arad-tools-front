@@ -5,20 +5,21 @@ import { ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { ProductFAQ } from '@/lib/types';
 
-export default function ProductFAQ({ faqs }: { faqs: ProductFAQ[] }) {
+export default function ProductFAQ({ faqs }: { faqs?: ProductFAQ[] }) {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
+  const list = Array.isArray(faqs) ? faqs : [];
 
-  if (!faqs.length) return null;
+  if (!list.length) return null;
 
   return (
     <section className="bg-white rounded-2xl border border-gray-100 p-5 sm:p-6">
       <h2 className="text-lg font-bold text-gray-900 mb-4">سوالات متداول</h2>
       <div className="space-y-2">
-        {faqs.map((faq, i) => {
+        {list.map((faq, i) => {
           const isOpen = openIndex === i;
 
           return (
-            <div key={faq.question} className="border border-gray-100 rounded-xl overflow-hidden">
+            <div key={`${faq.question}-${i}`} className="border border-gray-100 rounded-xl overflow-hidden">
               <button
                 type="button"
                 onClick={() => setOpenIndex(isOpen ? null : i)}

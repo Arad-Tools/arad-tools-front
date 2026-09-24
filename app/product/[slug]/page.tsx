@@ -23,7 +23,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     openGraph: {
       title: product.metaTitle || product.title,
       description: product.metaDescription,
-      images: product.images[0] ? [{ url: product.images[0] }] : undefined,
+      images: product.images?.[0] ? [{ url: product.images[0] }] : product.image ? [{ url: product.image }] : undefined,
       locale: 'fa_IR',
       type: 'website',
     },

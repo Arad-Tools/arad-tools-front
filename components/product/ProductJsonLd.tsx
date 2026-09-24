@@ -16,7 +16,7 @@ export default function ProductJsonLd({ product, pageUrl }: Props) {
     '@context': 'https://schema.org',
     '@type': 'Product',
     name: product.title,
-    image: product.images,
+    image: Array.isArray(product.images) && product.images.length > 0 ? product.images : [product.image || ''],
     description: product.metaDescription || product.title,
     sku: product.sku,
     brand: {
@@ -40,11 +40,11 @@ export default function ProductJsonLd({ product, pageUrl }: Props) {
   const breadcrumbSchema = {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
-    itemListElement: product.breadcrumbs.map((item, index) => ({
+    itemListElement: (Array.isArray(product.breadcrumbs) ? product.breadcrumbs : []).map((item, index) => ({
       '@type': 'ListItem',
       position: index + 1,
       name: item.label,
-      item: item.href.startsWith('http') ? item.href : `${pageUrl.split('/product')[0]}${item.href}`,
+      item: item.href?.startsWith('http') ? item.href : `${pageUrl.split('/product')[0]}${item.href || ''}`,
     })),
   };
 

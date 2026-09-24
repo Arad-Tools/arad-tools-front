@@ -6,14 +6,15 @@ import { Play, ZoomIn } from 'lucide-react';
 import { cn, productImage } from '@/lib/utils';
 
 interface Props {
-  images: string[];
+  images?: string[];
   title: string;
   videoUrl?: string;
 }
 
 export default function ProductGallery({ images, title, videoUrl }: Props) {
-  const gallery = images.length > 0
-    ? images.map((src) => productImage(src))
+  const rawImages = Array.isArray(images) ? images : [];
+  const gallery = rawImages.length > 0
+    ? rawImages.map((src) => productImage(src))
     : [productImage()];
   const [activeIndex, setActiveIndex] = useState(0);
   const [zoomed, setZoomed] = useState(false);
@@ -44,7 +45,7 @@ export default function ProductGallery({ images, title, videoUrl }: Props) {
         onClick={() => setZoomed((z) => !z)}
       >
         <Image
-          src={gallery[activeIndex]}
+          src={gallery[activeIndex] || productImage()}
           alt={title}
           fill
           sizes="(max-width: 768px) 100vw, 50vw"
@@ -85,7 +86,7 @@ export default function ProductGallery({ images, title, videoUrl }: Props) {
         <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
           {gallery.map((src, i) => (
             <button
-              key={src + i}
+              key={`${src}-${i}`}
               type="button"
               onClick={() => setActiveIndex(i)}
               className={cn(

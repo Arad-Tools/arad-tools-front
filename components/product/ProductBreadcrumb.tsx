@@ -2,11 +2,14 @@ import Link from 'next/link';
 import { ChevronLeft } from 'lucide-react';
 import type { BreadcrumbItem } from '@/lib/types';
 
-export default function ProductBreadcrumb({ items }: { items: BreadcrumbItem[] }) {
+export default function ProductBreadcrumb({ items }: { items?: BreadcrumbItem[] }) {
+  const list = Array.isArray(items) ? items : [];
+  if (!list.length) return null;
+
   return (
     <nav aria-label="مسیر صفحه" className="flex flex-wrap items-center gap-1 text-sm text-gray-500 mb-4">
-      {items.map((item, index) => {
-        const isLast = index === items.length - 1;
+      {list.map((item, index) => {
+        const isLast = index === list.length - 1;
 
         return (
           <span key={item.href} className="flex items-center gap-1">

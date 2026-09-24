@@ -7,13 +7,14 @@ import ProductCard from '@/components/home/ProductCard';
 
 interface Props {
   title: string;
-  products: Product[];
+  products?: Product[];
 }
 
 export default function ProductCarousel({ title, products }: Props) {
   const scrollRef = useRef<HTMLDivElement>(null);
+  const list = Array.isArray(products) ? products : [];
 
-  if (!products.length) return null;
+  if (!list.length) return null;
 
   const scroll = (dir: 'left' | 'right') => {
     const el = scrollRef.current;
@@ -50,7 +51,7 @@ export default function ProductCarousel({ title, products }: Props) {
         ref={scrollRef}
         className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide snap-x snap-mandatory"
       >
-        {products.map((product) => (
+        {list.map((product) => (
           <div key={product.id} className="w-[calc(50%-8px)] sm:w-[calc(33.333%-11px)] lg:w-[calc(25%-12px)] flex-shrink-0 snap-start">
             <ProductCard product={product} />
           </div>

@@ -27,7 +27,9 @@ export default function ProductReviews({
   reviewsCount,
   initialReviews,
 }: Props) {
-  const [reviews, setReviews] = useState(initialReviews);
+  const [reviews, setReviews] = useState<ProductReview[]>(
+    Array.isArray(initialReviews) ? initialReviews : [],
+  );
   const [sort, setSort] = useState<SortOption>('newest');
   const [authorName, setAuthorName] = useState('');
   const [body, setBody] = useState('');

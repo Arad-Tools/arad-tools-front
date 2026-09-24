@@ -1,5 +1,6 @@
 'use client';
 
+import { useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import { formatToman, toPersianDigits } from '@/lib/utils';
 import type { QuantityDiscount } from '@/lib/types';
@@ -20,6 +21,14 @@ export default function PricingSection({
   pricing,
   tiers,
 }: Props) {
+  const validTiers = useMemo(
+    () =>
+      (Array.isArray(tiers) ? tiers : [])
+        .filter((t) => t && t.minQuantity > 0 && t.discountPercent > 0)
+        .sort((a, b) => a.minQuantity - b.minQuantity),
+    [tiers],
+  );
+
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-end gap-3">
@@ -69,7 +78,7 @@ export default function PricingSection({
         </div>
       )}
 
-      {tiers.length > 0 && (
+      {validTiers.length > 0 && (
         <div className="overflow-hidden rounded-xl border border-gray-100">
           <table className="w-full text-sm">
             <thead>
@@ -79,28 +88,26 @@ export default function PricingSection({
               </tr>
             </thead>
             <tbody>
-              {tiers
-                .sort((a, b) => a.minQuantity - b.minQuantity)
-                .map((tier) => {
-                  const isActive = pricing.activeTier?.minQuantity === tier.minQuantity;
+              {validTiers.map((tier) => {
+                const isActive = pricing.activeTier?.minQuantity === tier.minQuantity;
 
-                  return (
-                    <tr
-                      key={tier.minQuantity}
-                      className={cn(
-                        'border-t border-gray-50 transition-colors',
-                        isActive && 'bg-brand/5 text-brand font-semibold',
-                      )}
-                    >
-                      <td className="py-2.5 px-3">
-                        {toPersianDigits(tier.minQuantity)} عدد و بیشتر
-                      </td>
-                      <td className="py-2.5 px-3">
-                        {toPersianDigits(tier.discountPercent)}٪
-                      </td>
-                    </tr>
-                  );
-                })}
+                return (
+                  <tr
+                    key={tier.minQuantity}
+                    className={cn(
+                      'border-t border-gray-50 transition-colors',
+                      isActive && 'bg-brand/5 text-brand font-semibold',
+                    )}
+                  >
+                    <td className="py-2.5 px-3">
+                      {toPersianDigits(tier.minQuantity)} عدد و بیشتر
+                    </td>
+                    <td className="py-2.5 px-3">
+                      {toPersianDigits(tier.discountPercent)}٪
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
