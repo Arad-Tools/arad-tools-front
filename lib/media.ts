@@ -40,6 +40,8 @@ export function getApiOrigin(): string {
   }
 }
 
+export const PRODUCT_PLACEHOLDER = '/images/product-placeholder.svg';
+
 /**
  * Resolves storage/media paths from the Laravel API to absolute URLs.
  *
@@ -54,6 +56,15 @@ export function resolveMediaUrl(src?: string | null): string | undefined {
 
   let trimmed = src.trim();
 
+  // If already a placeholder or static frontend asset, return local relative path directly
+  if (
+    trimmed.includes('product-placeholder.svg') ||
+    trimmed.startsWith('/images/') ||
+    trimmed.startsWith('images/')
+  ) {
+    return trimmed.startsWith('/') ? trimmed : `/${trimmed}`;
+  }
+
   // If the URL contains an internal Docker host, closed raw IP, or localhost in production,
   // extract the pathname to rebase onto the reachable public API origin.
   const isInternalOrDeadHost =
@@ -67,6 +78,14 @@ export function resolveMediaUrl(src?: string | null): string | undefined {
     } catch {
       // ignore
     }
+  }
+
+  if (
+    trimmed.includes('product-placeholder.svg') ||
+    trimmed.startsWith('/images/') ||
+    trimmed.startsWith('images/')
+  ) {
+    return trimmed.startsWith('/') ? trimmed : `/${trimmed}`;
   }
 
   if (/^https?:\/\//i.test(trimmed)) {
@@ -93,9 +112,11 @@ export function resolveMediaUrls(sources?: Array<string | null | undefined>): st
     .filter((src): src is string => Boolean(src));
 }
 
-export const PRODUCT_PLACEHOLDER = '/images/product-placeholder.svg';
-
 export function productImage(src?: string | null): string {
+  if (!src || !src.trim() || src.includes('product-placeholder.svg')) {
+    return PRODUCT_PLACEHOLDER;
+  }
+
   return resolveMediaUrl(src) ?? PRODUCT_PLACEHOLDER;
 }
 
@@ -190,8 +211,13 @@ function parseLabeledSpecs(input: unknown): LabeledSpecification[] {
 
 export function normalizeProductDetail(detail: ProductDetail): ProductDetail {
   const rawImages = parseJsonArray<string>(detail.images);
-  const images = resolveMediaUrls(rawImages);
-  const primary = resolveMediaUrl(detail.image) ?? images[0] ?? PRODUCT_PLACEHOLDER;
+  const images = resolveMediaUrls(rawImages).filter(
+    (url) => !url.includes('product-placeholder.svg'),
+  );
+  const rawPrimary = resolveMediaUrl(detail.image);
+  const primary = (rawPrimary && !rawPrimary.includes('product-placeholder.svg'))
+    ? rawPrimary
+    : images[0] ?? PRODUCT_PLACEHOLDER;
   const safeImages = images.length > 0 ? images : [primary];
 
   const rawRelated = parseJsonArray<Product>(detail.relatedProducts);

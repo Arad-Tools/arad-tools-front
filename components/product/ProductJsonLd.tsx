@@ -16,7 +16,9 @@ export default function ProductJsonLd({ product, pageUrl }: Props) {
     '@context': 'https://schema.org',
     '@type': 'Product',
     name: product.title,
-    image: Array.isArray(product.images) && product.images.length > 0 ? product.images : [product.image || ''],
+    image: (Array.isArray(product.images) && product.images.length > 0 ? product.images : [product.image || ''])
+      .filter(Boolean)
+      .map((img) => (img.startsWith('http') ? img : `${pageUrl.split('/product')[0]}${img.startsWith('/') ? '' : '/'}${img}`)),
     description: product.metaDescription || product.title,
     sku: product.sku,
     brand: {
