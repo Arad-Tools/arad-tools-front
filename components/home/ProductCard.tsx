@@ -21,7 +21,15 @@ export default function ProductCard({ product, priority = false }: Props) {
   const discount = calcDiscount(product.price, product.oldPrice);
   const { addItem } = useCart();
   const [added, setAdded] = useState(false);
-  const [imgSrc, setImgSrc] = useState(() => productImage(product.image));
+  const [failed, setFailed] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  const fallbackSrc = productImage(product.image);
+  const imgSrc = failed ? PRODUCT_PLACEHOLDER : fallbackSrc;
+  const isPlaceholder =
+    !imgSrc ||
+    imgSrc === PRODUCT_PLACEHOLDER ||
+    imgSrc.includes('product-placeholder.svg');
 
   const handleAddToCart = () => {
     addItem({
@@ -40,14 +48,27 @@ export default function ProductCard({ product, priority = false }: Props) {
 
       {/* ── Image ─────────────────────────────────────────────────────────── */}
       <Link href={`/product/${product.slug}`} className="block overflow-hidden bg-gray-50 aspect-square relative" tabIndex={-1} aria-hidden>
+        {!isLoaded && !isPlaceholder && (
+          <div className="absolute inset-0 bg-gray-100/80 animate-pulse pointer-events-none" />
+        )}
         <Image
+          key={imgSrc}
           src={imgSrc}
           alt={product.title}
           fill
           sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-          className="product-img object-contain p-4 transition-transform duration-400"
+          className={cn(
+            'product-img object-contain p-4 transition-all duration-300',
+            isPlaceholder
+              ? 'opacity-35 grayscale-[30%] scale-90'
+              : (isLoaded ? 'opacity-100' : 'opacity-0'),
+          )}
           priority={priority}
-          onError={() => setImgSrc(PRODUCT_PLACEHOLDER)}
+          onLoad={() => setIsLoaded(true)}
+          onError={() => {
+            setFailed(true);
+            setIsLoaded(true);
+          }}
         />
       </Link>
 
