@@ -13,11 +13,13 @@ import { useLocalStorage } from '@/lib/hooks/use-local-storage';
 interface CartContextValue {
   items: CartItem[];
   count: number;
+  total: number;
   hydrated: boolean;
   addItem: (item: Omit<CartItem, 'quantity'>, quantity?: number) => void;
   removeItem: (productId: string) => void;
   updateQuantity: (productId: string, quantity: number) => void;
   clearCart: () => void;
+  syncWithServer: (token: string) => Promise<void>;
 }
 
 const CartContext = createContext<CartContextValue | null>(null);
@@ -74,17 +76,49 @@ export function CartProvider({ children }: { children: ReactNode }) {
     [items],
   );
 
+  const total = useMemo(
+    () => items.reduce((sum, i) => sum + i.price * i.quantity, 0),
+    [items],
+  );
+
+  const syncWithServer = useCallback(
+    async (token: string) => {
+      if (!token || items.length === 0) {
+        return;
+      }
+
+      try {
+        const payload = items
+          .map((i) => ({
+            product_id: Number(i.productId),
+            quantity: i.quantity,
+          }))
+          .filter((i) => !Number.isNaN(i.product_id) && i.product_id > 0);
+
+        if (payload.length > 0) {
+          const { syncServerCart } = await import('@/lib/ecommerce-api');
+          await syncServerCart(payload, token);
+        }
+      } catch {
+        // Fallback gracefully if network/auth issues occur
+      }
+    },
+    [items],
+  );
+
   const value = useMemo(
     () => ({
       items,
       count,
+      total,
       hydrated,
       addItem,
       removeItem,
       updateQuantity,
       clearCart,
+      syncWithServer,
     }),
-    [items, count, hydrated, addItem, removeItem, updateQuantity, clearCart],
+    [items, count, total, hydrated, addItem, removeItem, updateQuantity, clearCart, syncWithServer],
   );
 
   return (

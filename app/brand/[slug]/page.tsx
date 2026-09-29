@@ -67,6 +67,7 @@ async function BrandPageContent({ params, searchParams }: Props) {
         lastPage: productResult.meta.lastPage,
         total: productResult.meta.total,
       }}
+      initialFallback={productResult.fallback}
     />
   );
 }

@@ -2,9 +2,10 @@
 
 import { useCallback, useEffect, useState, useTransition } from 'react';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
-import { Loader2 } from 'lucide-react';
+import Link from 'next/link';
+import { Loader2, SearchX, Sparkles, Folder, RotateCcw } from 'lucide-react';
 import type {
-  Category, Product, ProductFilters, ProductFilterMeta, ProductListingPreset,
+  Category, Product, ProductFilters, ProductFilterMeta, ProductListingPreset, SearchFallbackData,
 } from '@/lib/types';
 import { getProductsFiltered, getProductFilters } from '@/lib/api';
 import {
@@ -27,6 +28,7 @@ interface Props {
   initialMeta: ProductFilterMeta;
   initialFilters: ProductFilters;
   initialPagination?: { currentPage: number; lastPage: number; total: number };
+  initialFallback?: SearchFallbackData | null;
 }
 
 export default function ProductListing({
@@ -36,6 +38,7 @@ export default function ProductListing({
   initialMeta,
   initialFilters,
   initialPagination,
+  initialFallback,
 }: Props) {
   const router = useRouter();
   const pathname = usePathname();
@@ -43,6 +46,7 @@ export default function ProductListing({
   const [isPending, startTransition] = useTransition();
 
   const [products, setProducts] = useState(initialProducts);
+  const [fallback, setFallback] = useState<SearchFallbackData | null | undefined>(initialFallback);
   const [meta, setMeta] = useState(initialMeta);
   const [pagination, setPagination] = useState({
     currentPage: initialPagination?.currentPage ?? initialFilters.page ?? 1,
@@ -69,6 +73,7 @@ export default function ProductListing({
         getProductFilters(nextFilters),
       ]);
       setProducts(productResult.products);
+      setFallback(productResult.fallback ?? null);
       setMeta(filterMeta);
       setPagination({
         currentPage: productResult.meta.currentPage,
@@ -196,15 +201,104 @@ export default function ProductListing({
               )}
 
               {products.length === 0 ? (
-                <div className="text-center py-16 bg-white rounded-2xl border border-gray-100">
-                  <p className="text-gray-500 font-semibold">محصولی با این فیلترها یافت نشد.</p>
-                  <button
-                    type="button"
-                    onClick={() => handleFilterChange({ ...DEFAULT_FILTERS, ...presetDefaults })}
-                    className="mt-4 text-sm font-semibold text-brand hover:text-brand-700"
-                  >
-                    پاک کردن فیلترها
-                  </button>
+                <div className="space-y-8">
+                  <div className="text-center py-12 px-4 bg-white rounded-2xl border border-gray-100 shadow-xs">
+                    <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-amber-50 text-amber-600 mb-4">
+                      <SearchX className="w-7 h-7" />
+                    </div>
+                    <h3 className="text-lg font-bold text-gray-900">
+                      {filters.q
+                        ? `هیچ نتیجه‌ای برای «${filters.q}» پیدا نشد`
+                        : 'محصولی با این فیلترها یافت نشد'}
+                    </h3>
+                    <p className="text-sm text-gray-500 max-w-md mx-auto mt-1.5">
+                      املای کلمات را بررسی کنید یا عبارت ساده‌تر و کلی‌تری را جستجو نمایید.
+                    </p>
+
+                    {/* Did you mean suggestion (شرط ۱۸) */}
+                    {fallback?.did_you_mean && (
+                      <div className="inline-flex items-center gap-2 mt-4 px-4 py-2 bg-amber-50/90 border border-amber-200/80 rounded-xl text-xs sm:text-sm text-amber-900">
+                        <span>آیا منظور شما</span>
+                        <button
+                          type="button"
+                          onClick={() => handleFilterChange({ ...filters, q: fallback.did_you_mean! })}
+                          className="font-black text-brand hover:underline"
+                        >
+                          «{fallback.did_you_mean}»
+                        </button>
+                        <span>بود؟</span>
+                      </div>
+                    )}
+
+                    {/* Related Categories (شرط ۱۸) */}
+                    {fallback?.related_categories && fallback.related_categories.length > 0 && (
+                      <div className="mt-6 pt-6 border-t border-gray-100 max-w-xl mx-auto">
+                        <p className="text-xs font-bold text-gray-400 mb-3">دسته‌بندی‌های مرتبط پیشنهادی:</p>
+                        <div className="flex flex-wrap items-center justify-center gap-2">
+                          {fallback.related_categories.map((cat) => (
+                            <Link
+                              key={cat.id}
+                              href={`/products?category=${encodeURIComponent(cat.slug)}`}
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-50 hover:bg-brand/10 border border-gray-200/80 hover:border-brand/30 text-gray-700 hover:text-brand rounded-lg text-xs font-semibold transition-colors"
+                            >
+                              <Folder className="w-3.5 h-3.5 text-gray-400" />
+                              {cat.name}
+                            </Link>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Clear Filters Button */}
+                    <div className="mt-6">
+                      <button
+                        type="button"
+                        onClick={() => handleFilterChange({ ...DEFAULT_FILTERS, ...presetDefaults })}
+                        className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 transition-colors"
+                      >
+                        <RotateCcw className="w-3.5 h-3.5" />
+                        پاک کردن جستجو و فیلترها
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Recommended / In-stock products fallback (شرط ۱۸: کاربر هرگز با بن‌بست مواجه نشود) */}
+                  {fallback?.suggested_products && fallback.suggested_products.length > 0 && (
+                    <div className="space-y-4 pt-2">
+                      <div className="flex items-center justify-between border-b border-gray-100 pb-3">
+                        <div>
+                          <h2 className="text-base font-black text-gray-900 flex items-center gap-2">
+                            <Sparkles className="w-4 h-4 text-amber-500" />
+                            کالاهای پیشنهادی و پربازدید در انبار
+                          </h2>
+                          <p className="text-xs text-gray-500 mt-0.5">
+                            شاید این محصولات محبوب برای شما کاربردی باشند
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-3 gap-4">
+                        {fallback.suggested_products.map((p, i) => (
+                          <ProductCard
+                            key={p.id}
+                            product={{
+                              id: String(p.id),
+                              title: p.title,
+                              slug: p.slug,
+                              image: p.image || '',
+                              price: p.price,
+                              rating: 5,
+                              reviewsCount: 0,
+                              category: '',
+                              brand: '',
+                              inStock: p.in_stock,
+                            }}
+                            priority={i < 3}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               ) : (
                 <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-3 gap-4">

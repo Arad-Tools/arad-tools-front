@@ -10,6 +10,7 @@ export const DEFAULT_FILTERS: ProductFilters = {
 };
 
 export const SORT_LABELS: Record<string, string> = {
+  relevance:  'مرتبط‌ترین',
   newest:     'جدیدترین',
   oldest:     'قدیمی‌ترین',
   price_asc:  'ارزان‌ترین',
@@ -26,6 +27,9 @@ export function parseFiltersFromSearchParams(params: URLSearchParams): ProductFi
 
   if (params.get('q')) {
     filters.q = params.get('q')!;
+    if (!params.get('sort')) {
+      filters.sort = 'relevance';
+    }
   }
 
   for (const key of ARRAY_KEYS) {

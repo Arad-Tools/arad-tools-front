@@ -3,6 +3,7 @@ import type {
   ProductFilters, ProductFilterMeta, PaginatedProducts,
   ProductDetail, ProductReview,
   ContactInquiryPayload, ContactInquiryResponse, TrackOrderResponse,
+  SearchSuggestionsData, SearchHistoryItem,
 } from './types';
 import { buildFilterQueryString } from './product-filters';
 import {
@@ -149,22 +150,25 @@ interface LaravelPaginationMeta {
 interface LaravelPaginatedResponse<T> {
   data: T[];
   meta?: LaravelPaginationMeta;
+  fallback?: PaginatedProducts['fallback'];
 }
 
 function unwrapPaginatedProducts(json: unknown): PaginatedProducts {
-  if (json && typeof json === 'object' && 'data' in json) {
-    const payload = json as LaravelPaginatedResponse<Product>;
-    const products = Array.isArray(payload.data) ? payload.data : [];
-    const meta = payload.meta;
+  if (json && typeof json === 'object') {
+    const raw = json as Record<string, unknown>;
+    const productsArray = Array.isArray(raw.data) ? raw.data : (Array.isArray(json) ? json : []);
+    const meta = raw.meta as LaravelPaginationMeta | undefined;
+    const fallback = (raw.fallback as PaginatedProducts['fallback']) ?? null;
 
     return {
-      products: products.map(normalizeProduct),
+      products: (productsArray as Product[]).map(normalizeProduct),
       meta: {
-        currentPage: meta?.current_page ?? 1,
-        lastPage: meta?.last_page ?? 1,
-        perPage: meta?.per_page ?? products.length,
-        total: meta?.total ?? products.length,
+        currentPage: meta?.current_page ?? (raw.current_page as number | undefined) ?? 1,
+        lastPage: meta?.last_page ?? (raw.last_page as number | undefined) ?? 1,
+        perPage: meta?.per_page ?? (raw.per_page as number | undefined) ?? productsArray.length,
+        total: meta?.total ?? (raw.total as number | undefined) ?? productsArray.length,
       },
+      fallback,
     };
   }
 
@@ -400,6 +404,133 @@ export async function trackOrderInquiry(
       found: false,
       message: 'خطا در دریافت وضعیت سفارش. لطفاً اتصال اینترنت خود را بررسی کنید.',
     };
+  }
+}
+
+// ─── Search & Autocomplete API ───────────────────────────────────────────────
+
+/** Get instant categorized search suggestions */
+export async function getSearchSuggestions(
+  query: string,
+  limit = 6,
+): Promise<SearchSuggestionsData> {
+  const trimmed = query.trim();
+  if (!trimmed) {
+    return {
+      products: [],
+      categories: [],
+      brands: [],
+      exact_match: null,
+      total_results: 0,
+      has_more: false,
+      view_all_url: '',
+    };
+  }
+
+  const apiBase = getApiBaseUrl();
+  try {
+    const res = await fetch(`${apiBase}/search/suggestions?q=${encodeURIComponent(trimmed)}&limit=${limit}`, {
+      cache: 'no-store',
+      headers: { Accept: 'application/json' },
+    });
+
+    if (!res.ok) {
+      throw new Error(`HTTP ${res.status}`);
+    }
+
+    const json = await res.json() as { status: string; data: SearchSuggestionsData };
+    return json.data;
+  } catch (err) {
+    console.warn('[API] /search/suggestions failed:', err);
+    return {
+      products: [],
+      categories: [],
+      brands: [],
+      exact_match: null,
+      total_results: 0,
+      has_more: false,
+      view_all_url: `/products?q=${encodeURIComponent(trimmed)}`,
+    };
+  }
+}
+
+/** Get search history */
+export async function getSearchHistory(token?: string, sessionId?: string): Promise<SearchHistoryItem[]> {
+  const apiBase = getApiBaseUrl();
+  const headers: Record<string, string> = { Accept: 'application/json' };
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+  if (sessionId) headers['X-Session-Id'] = sessionId;
+
+  try {
+    const res = await fetch(`${apiBase}/search/history`, {
+      cache: 'no-store',
+      headers,
+    });
+    if (!res.ok) return [];
+
+    const json = await res.json() as { status: string; data: SearchHistoryItem[] };
+    return json.data ?? [];
+  } catch (err) {
+    console.warn('[API] /search/history failed:', err);
+    return [];
+  }
+}
+
+/** Record a search into backend history */
+export async function recordSearchHistory(query: string, token?: string, sessionId?: string): Promise<void> {
+  const trimmed = query.trim();
+  if (!trimmed) return;
+
+  const apiBase = getApiBaseUrl();
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    Accept: 'application/json',
+  };
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+  if (sessionId) headers['X-Session-Id'] = sessionId;
+
+  try {
+    await fetch(`${apiBase}/search/history`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ q: trimmed }),
+    });
+  } catch (err) {
+    // Non-blocking
+  }
+}
+
+/** Clear all search history */
+export async function clearSearchHistory(token?: string, sessionId?: string): Promise<void> {
+  const apiBase = getApiBaseUrl();
+  const headers: Record<string, string> = { Accept: 'application/json' };
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+  if (sessionId) headers['X-Session-Id'] = sessionId;
+
+  try {
+    await fetch(`${apiBase}/search/history`, {
+      method: 'DELETE',
+      headers,
+    });
+  } catch (err) {
+    console.warn('[API] clear search history failed:', err);
+  }
+}
+
+/** Delete a single search history item */
+export async function deleteSearchHistoryItem(id: number, token?: string, sessionId?: string): Promise<void> {
+  const apiBase = getApiBaseUrl();
+  const headers: Record<string, string> = { Accept: 'application/json' };
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+  if (sessionId) headers['X-Session-Id'] = sessionId;
+
+  try {
+    await fetch(`${apiBase}/search/history/${id}`, {
+      method: 'DELETE',
+      headers,
+    });
+  } catch (err) {
+    console.warn('[API] delete search history item failed:', err);
   }
 }
 

@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
-import { Star } from 'lucide-react';
+import { Star, Store, ShieldCheck } from 'lucide-react';
 import type { Product, ProductDetail } from '@/lib/types';
 import { calculateProductPricing, clampQuantity } from '@/lib/product-pricing';
 import { formatRating, toPersianDigits } from '@/lib/utils';
@@ -108,6 +108,33 @@ export default function ProductDetailView({ product }: Props) {
                 <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
                 <span className="font-bold text-gray-800">{formatRating(product.rating)}</span>
                 <span>({toPersianDigits(product.reviewsCount)} نظر)</span>
+              </div>
+            </div>
+
+            {/* Seller Info */}
+            <div className="flex items-center justify-between p-3.5 rounded-2xl bg-amber-50/70 border border-amber-200/80 text-sm">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-amber-100 flex items-center justify-center text-amber-700 flex-shrink-0">
+                  <Store className="w-5 h-5" />
+                </div>
+                <div>
+                  <span className="text-[11px] text-gray-500 block">فروشنده کالا</span>
+                  {product.seller ? (
+                    <Link
+                      href={`/seller/${product.seller.slug}`}
+                      className="font-bold text-gray-900 hover:text-amber-800 transition-colors inline-flex items-center gap-1"
+                    >
+                      {product.seller.storeName}
+                      <span className="text-[10px] text-amber-600 bg-amber-100 px-1.5 py-0.5 rounded">فروشنده رسمی</span>
+                    </Link>
+                  ) : (
+                    <span className="font-bold text-gray-900">فروشگاه مرکزی آراد ابزار</span>
+                  )}
+                </div>
+              </div>
+              <div className="flex items-center gap-1 text-xs text-emerald-700 bg-emerald-100/70 px-2.5 py-1 rounded-full font-medium">
+                <ShieldCheck className="w-3.5 h-3.5" />
+                <span>ضمانت اصالت</span>
               </div>
             </div>
 

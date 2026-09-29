@@ -91,19 +91,28 @@ export default function CartPage() {
               ))}
             </div>
 
-            <div className="bg-white rounded-2xl shadow-card border border-gray-100 p-6 h-fit">
-              <h2 className="font-bold text-lg mb-4">خلاصه سفارش</h2>
-              <div className="flex justify-between text-sm text-gray-600 mb-2">
-                <span>تعداد اقلام</span>
-                <span>{toPersianDigits(count)}</span>
+            <div className="bg-white rounded-2xl shadow-card border border-gray-100 p-6 h-fit sticky top-24">
+              <h2 className="font-bold text-lg mb-4 text-navy-900">خلاصه سفارش</h2>
+              <div className="space-y-3 text-sm text-gray-600 mb-4">
+                <div className="flex justify-between">
+                  <span>تعداد اقلام</span>
+                  <span className="font-medium text-gray-900">{toPersianDigits(count)} عدد</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>هزینه ارسال</span>
+                  <span className="text-emerald-600 font-medium">رایگان</span>
+                </div>
               </div>
-              <div className="flex justify-between font-bold text-lg mt-4 pt-4 border-t border-gray-100">
-                <span>جمع کل</span>
-                <span className="text-brand">{formatToman(total)}</span>
+              <div className="flex justify-between font-bold text-lg pt-4 border-t border-gray-100">
+                <span>مبلغ قابل پرداخت</span>
+                <span className="text-brand font-extrabold">{formatToman(total)}</span>
               </div>
-              <button type="button" className="btn-primary w-full mt-6" disabled>
-                ادامه خرید (به‌زودی)
-              </button>
+              <Link
+                href="/checkout"
+                className="btn-primary w-full mt-6 flex items-center justify-center gap-2 py-3.5 text-base shadow-lg shadow-brand/20 hover:shadow-brand/30 transition-all rounded-xl text-center"
+              >
+                ادامه فرآیند خرید
+              </Link>
             </div>
           </div>
         )}

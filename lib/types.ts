@@ -16,6 +16,7 @@ export interface Product {
   categorySlug?: string;
   brandSlug?: string;
   stockQuantity?: number;
+  seller?: { id: number; storeName: string; slug: string; rating?: number } | null;
 }
 
 export type AvailabilityStatus = 'in_stock' | 'out_of_stock' | 'restocking';
@@ -80,6 +81,8 @@ export interface CartItem {
   image: string;
   price: number;
   quantity: number;
+  id?: number;
+  seller?: { id: number; storeName: string; slug: string } | null;
 }
 
 export interface Video {
@@ -178,6 +181,64 @@ export interface ProductFilters {
   per_page?: number;
 }
 
+export interface SearchSuggestionProduct {
+  id: number | string;
+  title: string;
+  slug: string;
+  sku?: string;
+  price: number;
+  formatted_price: string;
+  image?: string | null;
+  in_stock: boolean;
+  stock_quantity?: number;
+}
+
+export interface SearchSuggestionCategory {
+  id: number | string;
+  name: string;
+  slug: string;
+  count: number;
+}
+
+export interface SearchSuggestionBrand {
+  id: number | string;
+  name: string;
+  slug: string;
+  logo?: string | null;
+  count: number;
+}
+
+export interface SearchSuggestionsData {
+  products: SearchSuggestionProduct[];
+  categories: SearchSuggestionCategory[];
+  brands: SearchSuggestionBrand[];
+  exact_match?: SearchSuggestionProduct | null;
+  total_results: number;
+  has_more: boolean;
+  view_all_url: string;
+}
+
+export interface SearchHistoryItem {
+  id: number;
+  query: string;
+  created_at: string;
+}
+
+export interface SearchFallbackData {
+  did_you_mean?: string | null;
+  related_categories: Array<{ id: number | string; name: string; slug: string }>;
+  suggested_products: Array<{
+    id: number | string;
+    title: string;
+    slug: string;
+    sku?: string;
+    price: number;
+    formatted_price: string;
+    image?: string | null;
+    in_stock: boolean;
+  }>;
+}
+
 export interface PaginatedProducts {
   products: Product[];
   meta: {
@@ -186,6 +247,7 @@ export interface PaginatedProducts {
     perPage: number;
     total: number;
   };
+  fallback?: SearchFallbackData | null;
 }
 
 export interface ProductListingPreset {
@@ -243,6 +305,7 @@ export interface Customer {
   name: string | null;
   email: string | null;
   profile_complete: boolean;
+  isSeller?: boolean;
 }
 
 export interface AuthResponse {
@@ -287,6 +350,135 @@ export interface TrackOrderResponse {
     created_at: string;
     updated_at: string;
   };
+}
+
+// ─── Ecommerce Domain Types ───────────────────────────────────────────────────
+
+export interface CustomerAddress {
+  id: number;
+  title: string;
+  recipientName: string;
+  recipientMobile: string;
+  province: string;
+  city: string;
+  postalCode: string;
+  address: string;
+  buildingNumber?: string | null;
+  unit?: string | null;
+  isDefault: boolean;
+  fullAddress: string;
+}
+
+export interface AddressInput {
+  title?: string;
+  recipient_name: string;
+  recipient_mobile: string;
+  province: string;
+  city: string;
+  postal_code: string;
+  address: string;
+  building_number?: string;
+  unit?: string;
+  is_default?: boolean;
+}
+
+export interface Seller {
+  id: number;
+  storeName: string;
+  slug: string;
+  contactName?: string | null;
+  phone?: string | null;
+  email?: string | null;
+  address?: string | null;
+  description?: string | null;
+  logo?: string | null;
+  status: string;
+  statusLabel: string;
+  commissionRate: number;
+  rating: number;
+  reviewsCount: number;
+  isVerified: boolean;
+}
+
+export interface OrderItem {
+  id: number;
+  productId: number;
+  productTitle: string;
+  productSku?: string | null;
+  productSlug?: string | null;
+  image?: string | null;
+  unitPrice: number;
+  quantity: number;
+  totalPrice: number;
+  status: string;
+  seller?: { id: number; storeName: string; slug: string } | null;
+}
+
+export interface Order {
+  id: number;
+  orderNumber: string;
+  status: string;
+  statusLabel: string;
+  paymentStatus: string;
+  paymentStatusLabel: string;
+  paymentMethod: string;
+  paymentMethodLabel: string;
+  subtotal: number;
+  shippingCost: number;
+  discountAmount: number;
+  totalAmount: number;
+  shippingAddress: {
+    recipient_name: string;
+    recipient_mobile: string;
+    province: string;
+    city: string;
+    postal_code: string;
+    address: string;
+    building_number?: string;
+    unit?: string;
+  };
+  customerNotes?: string | null;
+  trackingCode?: string | null;
+  paidAt?: string | null;
+  createdAt?: string | null;
+  items?: OrderItem[];
+  itemsCount?: number;
+}
+
+export interface Payment {
+  id: number;
+  orderId: number;
+  gateway: string;
+  gatewayLabel: string;
+  status: string;
+  statusLabel: string;
+  amount: number;
+  trackingCode?: string | null;
+  referenceId?: string | null;
+  cardPan?: string | null;
+  paidAt?: string | null;
+  createdAt?: string | null;
+}
+
+export interface CheckoutPayload {
+  address_id?: number;
+  recipient_name?: string;
+  recipient_mobile?: string;
+  province?: string;
+  city?: string;
+  postal_code?: string;
+  address?: string;
+  building_number?: string;
+  unit?: string;
+  customer_notes?: string;
+  payment_method?: string;
+}
+
+export interface CheckoutResponse {
+  message: string;
+  order: Order;
+  payment: Payment;
+  redirectUrl: string;
 }
 
 

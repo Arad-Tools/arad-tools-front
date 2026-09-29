@@ -34,6 +34,7 @@ export default function MobileStickyBar({
       title: product.title,
       image: product.image,
       price: finalTotal / quantity,
+      seller: product.seller,
     }, quantity);
   };
 

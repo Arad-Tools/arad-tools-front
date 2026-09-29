@@ -49,6 +49,7 @@ async function ProductsPageContent({ searchParams }: Props) {
         lastPage: productResult.meta.lastPage,
         total: productResult.meta.total,
       }}
+      initialFallback={productResult.fallback}
     />
   );
 }

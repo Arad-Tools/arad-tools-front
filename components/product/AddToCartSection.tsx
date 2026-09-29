@@ -23,6 +23,7 @@ export default function AddToCartSection({ product, quantity, finalPrice }: Prop
       title: product.title,
       image: product.image,
       price: finalPrice / quantity,
+      seller: product.seller,
     }, quantity);
 
     setAdded(true);
