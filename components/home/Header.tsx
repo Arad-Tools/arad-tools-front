@@ -4,7 +4,7 @@ import Image from 'next/image';
 import { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import {
-  ShoppingCart, User, Menu, X, Phone, ChevronDown, ChevronUp, Layers, Tag, BookOpen,
+  ShoppingCart, User, Menu, X, Phone, ChevronDown, ChevronUp, Layers, Tag, BookOpen, Search,
 } from 'lucide-react';
 import { toPersianDigits } from '@/lib/utils';
 import { useCart } from '@/lib/stores/cart-context';
@@ -14,9 +14,11 @@ import type { Category } from '@/lib/types';
 import ProfileMenu from '@/components/auth/ProfileMenu';
 import LoginModal from '@/components/auth/LoginModal';
 import SearchForm from '@/components/search/SearchForm';
+import MobileSearchModal from '@/components/search/MobileSearchModal';
 
 export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
   const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({});
   const [megaMenuOpen, setMegaMenuOpen] = useState(false);
@@ -85,7 +87,7 @@ export default function Header() {
             </Link>
 
             {/* ── Search — center ─────────────────────────────────────────── */}
-            <div className="flex-1 max-w-xl mx-auto">
+            <div className="hidden md:block flex-1 max-w-xl mx-auto">
               <Suspense fallback={null}>
                 <SearchForm />
               </Suspense>
@@ -93,6 +95,16 @@ export default function Header() {
 
             {/* ── Actions — end (left in RTL) ─────────────────────────────── */}
             <div className="flex items-center gap-1 flex-shrink-0">
+              {/* Mobile Search Button */}
+              <button
+                type="button"
+                onClick={() => setMobileSearchOpen(true)}
+                className="md:hidden p-2 rounded-lg hover:bg-white/10 transition-colors"
+                aria-label="جستجو در ابزار آراد"
+              >
+                <Search className="w-5 h-5" />
+              </button>
+
               {/* Cart */}
               <Link
                 href="/cart"
@@ -263,9 +275,18 @@ export default function Header() {
 
             {/* Search in mobile */}
             <div className="p-4 border-b">
-              <Suspense fallback={null}>
-                <SearchForm variant="mobile" onSubmit={() => setMenuOpen(false)} />
-              </Suspense>
+              <button
+                type="button"
+                onClick={() => {
+                  setMenuOpen(false);
+                  setMobileSearchOpen(true);
+                }}
+                className="flex items-center justify-between w-full border border-gray-200 bg-gray-50 hover:bg-gray-100 rounded-xl px-3.5 py-2.5 text-xs text-gray-500 transition-all text-start"
+                aria-label="جستجو در ابزار آراد"
+              >
+                <span>جستجوی نام ابزار، برند، مدل یا کد کالا...</span>
+                <Search className="w-4 h-4 text-gray-400 shrink-0 ms-2" />
+              </button>
             </div>
 
             {/* General quick links */}
@@ -397,6 +418,10 @@ export default function Header() {
         </>
       )}
 
+      <MobileSearchModal
+        isOpen={mobileSearchOpen}
+        onClose={() => setMobileSearchOpen(false)}
+      />
       <LoginModal />
     </header>
   );
