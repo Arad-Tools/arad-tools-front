@@ -125,6 +125,15 @@ export default function ProductListing({
         categories={categories}
         activeSlugs={activeCategorySlugs}
         basePath="/products"
+        onSelectCategory={(slug) => {
+          handleFilterChange({
+            ...filters,
+            category: slug ? [slug] : undefined,
+            subcategory: undefined,
+            spec: undefined,
+            page: 1,
+          });
+        }}
       />
 
       <div className="container mx-auto px-4 py-6">

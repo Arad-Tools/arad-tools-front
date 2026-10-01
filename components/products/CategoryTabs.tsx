@@ -8,17 +8,16 @@ interface Props {
   categories: Category[];
   activeSlugs?: string[];
   basePath?: string;
+  onSelectCategory?: (slug: string | null) => void;
 }
-
-const EXCLUDED_TAB_SLUGS = new Set(['plumbing', 'paint', 'garden']);
 
 export default function CategoryTabs({
   categories,
   activeSlugs = [],
   basePath = '/products',
+  onSelectCategory,
 }: Props) {
   const isAllActive = activeSlugs.length === 0;
-  const visibleCategories = categories.filter((cat) => !EXCLUDED_TAB_SLUGS.has(cat.slug));
 
   return (
     <div className="border-b border-gray-200 bg-white">
@@ -26,42 +25,47 @@ export default function CategoryTabs({
         <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide py-3">
           <Link
             href={basePath}
+            onClick={(e) => {
+              if (onSelectCategory) {
+                e.preventDefault();
+                onSelectCategory(null);
+              }
+            }}
             className={cn(
-              'flex-shrink-0 inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-semibold border transition-all',
+              'flex-shrink-0 inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-semibold border transition-all cursor-pointer',
               isAllActive
-                ? 'bg-navy-800 text-white border-navy-800'
+                ? 'bg-navy-800 text-white border-navy-800 shadow-xs'
                 : 'bg-gray-50 text-gray-600 border-gray-200 hover:border-navy-300 hover:text-navy-800',
             )}
           >
             همه محصولات
           </Link>
 
-          {visibleCategories.map((cat) => {
+          {categories.map((cat) => {
             const active = activeSlugs.includes(cat.slug);
 
             return (
               <Link
                 key={cat.id}
                 href={`/products?category=${encodeURIComponent(cat.slug)}`}
+                onClick={(e) => {
+                  if (onSelectCategory) {
+                    e.preventDefault();
+                    onSelectCategory(cat.slug);
+                  }
+                }}
                 className={cn(
-                  'flex-shrink-0 inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-semibold border transition-all',
+                  'flex-shrink-0 inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-semibold border transition-all cursor-pointer',
                   active
-                    ? 'bg-navy-800 text-white border-navy-800'
-                    : cn(cat.color, 'hover:shadow-sm'),
+                    ? 'bg-navy-800 text-white border-navy-800 shadow-xs'
+                    : cn(cat.color || 'bg-gray-50 text-gray-700 border-gray-200', 'hover:shadow-xs'),
                 )}
               >
-                <span aria-hidden>{cat.icon}</span>
+                {cat.icon && <span aria-hidden>{cat.icon}</span>}
                 {cat.name}
               </Link>
             );
           })}
-
-          <Link
-            href="/products"
-            className="flex-shrink-0 text-sm font-semibold text-brand hover:text-brand-700 px-2 whitespace-nowrap"
-          >
-            همه دسته‌بندی‌ها →
-          </Link>
         </div>
       </div>
     </div>
