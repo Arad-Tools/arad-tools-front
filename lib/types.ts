@@ -134,9 +134,17 @@ export interface FilterOption {
   parentSlug?: string;
 }
 
+export interface GeneralFilterMeta {
+  brands: FilterOption[];
+  priceRange: { min: number; max: number };
+  stock: FilterOption[];
+  on_sale_count?: number;
+}
+
 export interface SpecFilterGroup {
   key: string;
   label: string;
+  type?: string;
   options: FilterOption[];
 }
 
@@ -148,6 +156,8 @@ export interface ProductFilterMeta {
   brands: FilterOption[];
   stock: FilterOption[];
   rating: FilterOption[];
+  general?: GeneralFilterMeta;
+  category_filters?: Record<string, SpecFilterGroup>;
   attributes: Record<string, SpecFilterGroup>;
   tools: Record<string, SpecFilterGroup>;
   sortOptions: FilterOption[];
