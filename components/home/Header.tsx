@@ -15,6 +15,7 @@ import ProfileMenu from '@/components/auth/ProfileMenu';
 import LoginModal from '@/components/auth/LoginModal';
 import SearchForm from '@/components/search/SearchForm';
 import MobileSearchModal from '@/components/search/MobileSearchModal';
+import { STORE_CONTACT } from '@/lib/contact';
 
 export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -50,9 +51,9 @@ export default function Header() {
       <div className="bg-navy-800 text-gray-200 text-xs py-1.5 hidden md:block">
         <div className="container mx-auto px-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <a href="tel:02112345678" className="flex items-center gap-1.5 hover:text-white transition-colors">
+            <a href={STORE_CONTACT.phoneTel} className="flex items-center gap-1.5 hover:text-white transition-colors">
               <Phone className="w-3 h-3" />
-              <span dir="ltr">{toPersianDigits('021-1234-5678')}</span>
+              <span dir="ltr">{STORE_CONTACT.phoneDisplay}</span>
             </a>
             <span className="text-gray-500">|</span>
             <span>پشتیبانی ۲۴/۷</span>

@@ -24,6 +24,7 @@ import ShopShell from '@/components/layout/ShopShell';
 import { submitContactInquiry, trackOrderInquiry } from '@/lib/api';
 import type { TrackOrderResponse } from '@/lib/types';
 import { toPersianDigits, cn } from '@/lib/utils';
+import { STORE_CONTACT } from '@/lib/contact';
 
 function ContactContent() {
   const searchParams = useSearchParams();
@@ -360,7 +361,7 @@ function ContactContent() {
                   <div>
                     <h4 className="text-xs font-bold text-gray-900 mb-1">زمان‌بندی ارسال مرسولات</h4>
                     <p className="text-[11px] text-gray-500 leading-relaxed">
-                      سفارش‌های تهران همان روز یا روز بعد توسط پیک تحویل می‌شوند. سفارش‌های شهرستان از طریق پست پیشتاز یا تیپاکس ظرف ۲۴ الی ۴۸ ساعت ارسال می‌گردند.
+                      سفارش‌های ارومیه همان روز یا روز بعد توسط پیک تحویل می‌شوند. سفارش‌های سایر شهرستان‌ها از طریق پست پیشتاز یا تیپاکس ظرف ۲۴ الی ۴۸ ساعت ارسال می‌گردند.
                     </p>
                   </div>
                 </div>
@@ -540,12 +541,9 @@ function ContactContent() {
                 <Phone className="w-4 h-4" />
               </div>
               <div>
-                <span className="text-xs text-gray-400 block mb-0.5">تلفن‌های تماس</span>
-                <a href="tel:02112345678" className="text-sm font-bold text-gray-900 hover:text-brand block dir-ltr">
-                  {toPersianDigits('021-1234-5678')}
-                </a>
-                <a href="tel:09121234567" className="text-xs font-semibold text-gray-600 hover:text-brand block dir-ltr mt-0.5">
-                  {toPersianDigits('0912-123-4567')}
+                <span className="text-xs text-gray-400 block mb-0.5">شماره تماس اختصاصی</span>
+                <a href={STORE_CONTACT.phoneTel} className="text-sm font-bold text-gray-900 hover:text-brand block dir-ltr">
+                  {STORE_CONTACT.phoneDisplay}
                 </a>
               </div>
             </div>
@@ -558,7 +556,7 @@ function ContactContent() {
               <div>
                 <span className="text-xs text-gray-400 block mb-0.5">آدرس دفتر مرکزی و فروشگاه</span>
                 <p className="text-xs font-semibold text-gray-800 leading-relaxed">
-                  تهران، میدان حسن‌آباد، خیابان امام خمینی، روبروی بیمارستان سینا، پلاک ۲۴
+                  {STORE_CONTACT.address}
                 </p>
               </div>
             </div>
@@ -571,10 +569,10 @@ function ContactContent() {
               <div>
                 <span className="text-xs text-gray-400 block mb-0.5">ساعات کاری و پاسخگویی</span>
                 <p className="text-xs font-semibold text-gray-800 leading-relaxed">
-                  شنبه تا چهارشنبه: ۹:۰۰ الی ۱۸:۰۰
+                  {STORE_CONTACT.workingHoursFull}
                 </p>
                 <p className="text-xs font-medium text-gray-500">
-                  پنج‌شنبه‌ها: ۹:۰۰ الی ۱۴:۰۰
+                  ساعت کاری: {STORE_CONTACT.workingHours}
                 </p>
               </div>
             </div>
@@ -585,9 +583,9 @@ function ContactContent() {
                 <Mail className="w-4 h-4" />
               </div>
               <div>
-                <span className="text-xs text-gray-400 block mb-0.5">پست الکترونیکی</span>
-                <a href="mailto:info@aradtoolsco.ir" className="text-xs font-bold text-gray-800 hover:text-brand block" dir="ltr">
-                  info@aradtoolsco.ir
+                <span className="text-xs text-gray-400 block mb-0.5">پست الکترونیکی اختصاصی</span>
+                <a href={STORE_CONTACT.emailMailto} className="text-xs font-bold text-gray-800 hover:text-brand block" dir="ltr">
+                  {STORE_CONTACT.email}
                 </a>
               </div>
             </div>
@@ -604,7 +602,7 @@ function ContactContent() {
 
             <div className="grid grid-cols-2 gap-2.5 text-xs">
               <a
-                href="https://t.me/Aradprofessionaltools"
+                href={STORE_CONTACT.telegramUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl bg-white border border-gray-200 text-sky-600 font-bold hover:bg-sky-50 transition-colors shadow-xs"
@@ -612,7 +610,7 @@ function ContactContent() {
                 <span>تلگرام</span>
               </a>
               <a
-                href="https://ble.ir/arad_tools"
+                href={STORE_CONTACT.baleUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl bg-white border border-gray-200 text-emerald-600 font-bold hover:bg-emerald-50 transition-colors shadow-xs"
@@ -620,7 +618,7 @@ function ContactContent() {
                 <span>بله</span>
               </a>
               <a
-                href="https://rubika.ir/c0Do88J01d8b789eaee5165eeb016709"
+                href={STORE_CONTACT.rubikaUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl bg-white border border-gray-200 text-purple-600 font-bold hover:bg-purple-50 transition-colors shadow-xs"
@@ -628,7 +626,7 @@ function ContactContent() {
                 <span>روبیکا</span>
               </a>
               <a
-                href="https://wa.me/989121234567"
+                href={STORE_CONTACT.whatsappUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl bg-white border border-gray-200 text-green-600 font-bold hover:bg-green-50 transition-colors shadow-xs"

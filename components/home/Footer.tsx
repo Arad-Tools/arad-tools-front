@@ -4,6 +4,7 @@ import {
   Phone, Mail, MapPin,
   ShieldCheck, Truck, CreditCard, RefreshCw,
 } from 'lucide-react';
+import { STORE_CONTACT } from '@/lib/contact';
 
 const FOOTER_LINKS = {
   shop: [
@@ -160,20 +161,20 @@ export default function Footer() {
             <h3 className="text-white font-bold mb-4 text-sm">تماس و اطلاعات</h3>
             <ul className="space-y-3 mb-5">
               <li>
-                <a href="tel:02112345678" className="flex items-center gap-2.5 text-sm text-gray-400 hover:text-white transition-colors">
+                <a href={STORE_CONTACT.phoneTel} className="flex items-center gap-2.5 text-sm text-gray-400 hover:text-white transition-colors">
                   <Phone className="w-4 h-4 text-brand flex-shrink-0" />
-                  <span dir="ltr">۰۲۱-۱۲۳۴-۵۶۷۸</span>
+                  <span dir="ltr">{STORE_CONTACT.phoneDisplay}</span>
                 </a>
               </li>
               <li>
-                <a href="mailto:info@abzarsara.ir" className="flex items-center gap-2.5 text-sm text-gray-400 hover:text-white transition-colors">
+                <a href={STORE_CONTACT.emailMailto} className="flex items-center gap-2.5 text-sm text-gray-400 hover:text-white transition-colors">
                   <Mail className="w-4 h-4 text-brand flex-shrink-0" />
-                  info@abzarsara.ir
+                  {STORE_CONTACT.email}
                 </a>
               </li>
               <li className="flex items-start gap-2.5 text-sm text-gray-400">
                 <MapPin className="w-4 h-4 text-brand flex-shrink-0 mt-0.5" />
-                <span>تهران، خیابان ولیعصر، پلاک ۱۲۳</span>
+                <span>{STORE_CONTACT.address}</span>
               </li>
             </ul>
 
