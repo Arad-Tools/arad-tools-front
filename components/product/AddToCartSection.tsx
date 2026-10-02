@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { ShoppingCart, Zap, CheckCircle2 } from 'lucide-react';
+import { ShoppingCart, CheckCircle2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useCart } from '@/lib/stores/cart-context';
 import type { ProductDetail } from '@/lib/types';
@@ -31,7 +31,7 @@ export default function AddToCartSection({ product, quantity, finalPrice }: Prop
   };
 
   return (
-    <div className="space-y-3">
+    <div>
       <button
         type="button"
         onClick={handleAdd}
@@ -53,15 +53,6 @@ export default function AddToCartSection({ product, quantity, finalPrice }: Prop
             افزودن به سبد خرید
           </>
         )}
-      </button>
-
-      <button
-        type="button"
-        onClick={handleAdd}
-        className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl text-sm font-bold border-2 border-navy text-navy hover:bg-navy hover:text-white transition-all"
-      >
-        <Zap className="w-4 h-4" />
-        خرید فوری
       </button>
     </div>
   );
