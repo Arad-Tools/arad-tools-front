@@ -4,10 +4,8 @@ import Image from 'next/image';
 import { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import {
-  ShoppingCart, User, Menu, X, Phone, ChevronDown, ChevronUp, Layers, Tag, BookOpen, Search,
+  User, Menu, X, Phone, ChevronDown, ChevronUp, Layers, Tag, BookOpen, Search,
 } from 'lucide-react';
-import { toPersianDigits } from '@/lib/utils';
-import { useCart } from '@/lib/stores/cart-context';
 import { useAuth } from '@/lib/stores/auth-context';
 import { getCategories } from '@/lib/api';
 import type { Category } from '@/lib/types';
@@ -15,6 +13,7 @@ import ProfileMenu from '@/components/auth/ProfileMenu';
 import LoginModal from '@/components/auth/LoginModal';
 import SearchForm from '@/components/search/SearchForm';
 import MobileSearchModal from '@/components/search/MobileSearchModal';
+import CartPopover from '@/components/cart/CartPopover';
 import { STORE_CONTACT } from '@/lib/contact';
 
 export default function Header() {
@@ -24,7 +23,6 @@ export default function Header() {
   const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({});
   const [megaMenuOpen, setMegaMenuOpen] = useState(false);
 
-  const { count: cartCount } = useCart();
   const { isAuthenticated, hydrated, openLogin, logout } = useAuth();
 
   useEffect(() => {
@@ -107,18 +105,7 @@ export default function Header() {
               </button>
 
               {/* Cart */}
-              <Link
-                href="/cart"
-                aria-label={`سبد خرید — ${toPersianDigits(cartCount)} آیتم`}
-                className="relative p-2 rounded-lg hover:bg-white/10 transition-colors"
-              >
-                <ShoppingCart className="w-5 h-5" />
-                {cartCount > 0 && (
-                  <span className="absolute -top-0.5 -end-0.5 w-4 h-4 bg-brand rounded-full flex items-center justify-center text-[10px] font-bold">
-                    {toPersianDigits(cartCount)}
-                  </span>
-                )}
-              </Link>
+              <CartPopover />
 
               {/* User */}
               {hydrated && isAuthenticated ? (
